@@ -1,0 +1,4 @@
+{
+    "java.dependency.packagePresentation": "hierarchical",
+    "javascript.validate.enable": false,
+}
