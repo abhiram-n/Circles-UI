@@ -11,13 +11,6 @@ const CirclePopup = ({isVisible, navigate, onClose}) => (
     <View style={{height: '100%', width: '100%', backgroundColor: "rgba(255,255,255,0.85)"}}>
       <View style={styles.optionsContainer}>
       <TopRightButton iconName="times"  height={40} color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} onPress={onClose}/>
-      <TouchableOpacity style={{flexDirection: 'row', padding: 10}} onPress={()=>{onClose(); navigate("AddToCircle")}}>
-          <Icon name="plus" type="FontAwesome5" style={[styles.icon, {fontSize: 22, color: Constants.APP_THEME_COLORS[0]}]} />
-          <View style={{flexDirection: 'column', alignSelf: 'center'}}>
-              <Text style={styles.circlePopupOptionTitle}>{UIStrings.ADD}</Text>
-              <Text numberOfLines={1} style={styles.circlePopupOptionSubtitle}>{UIStrings.ADD_SUBTITLE}</Text>
-          </View>
-      </TouchableOpacity>
       <View style={{borderBottomWidth: 1, marginVertical: 2, borderColor: Constants.BACKGROUND_GREY_COLOR, width: '90%', alignSelf: 'center'}} />
       <TouchableOpacity style={{flexDirection: 'row', padding: 10}} onPress={()=>{onClose();navigate("AllFriendRequests");}}>
           <Icon name="user-plus" type="FontAwesome5" style={[styles.icon, {fontSize: 16, color: Constants.APP_THEME_COLORS[0]}]} />
@@ -38,7 +31,7 @@ const CirclePopup = ({isVisible, navigate, onClose}) => (
       <TouchableOpacity style={{flexDirection: 'row', padding: 10}} onPress={()=>{onClose();navigate("AllPosts");}}>
           <Icon name="microphone-alt" type="FontAwesome5" style={[styles.icon, {fontSize: 22, color: Constants.APP_THEME_COLORS[0]}]} />
           <View style={{flexDirection: 'column', alignSelf: 'center'}}>
-              <Text style={styles.circlePopupOptionTitle}>{UIStrings.BROADCAST}</Text>
+              <Text style={styles.circlePopupOptionTitle}>{UIStrings.BROADCASTS}</Text>
               <Text numberOfLines={1} style={styles.circlePopupOptionSubtitle}>{UIStrings.BROADCAST_SUBTITLE}</Text>
           </View>
       </TouchableOpacity>
@@ -58,7 +51,10 @@ const styles = StyleSheet.create({
     position: 'absolute', 
     bottom: Constants.BOTTOM_MENU_HEIGHT, 
     borderWidth: 2, 
-    borderColor: Constants.BACKGROUND_GREY_COLOR, 
+    borderStartWidth: 0.5,
+    borderEndWidth: 0.5,
+    borderBottomWidth: 0,
+    borderColor: Constants.APP_THEME_COLORS[0],
     borderTopRightRadius: 30, 
     borderTopLeftRadius: 30, 
     height: 280,

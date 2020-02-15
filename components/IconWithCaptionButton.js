@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, 
         justifyContent: 'center',
         flex: 1,
-        fontSize: 16,
+        fontSize: 18,
         alignItems: 'center',
         alignContent: 'center',
         textAlignVertical: "center"

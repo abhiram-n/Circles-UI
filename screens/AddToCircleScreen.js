@@ -10,13 +10,13 @@ import * as AuthHelpers from '../helpers/AuthHelpers';
 import * as UIStrings from '../helpers/UIStrings';
 import IconWithCaptionButton from '../components/IconWithCaptionButton';
 import * as NavigationHelpers from '../helpers/NavigationHelpers';
-import CirclePopup from "../components/CirclePopup";
 import CommonStyles from '../components/CommonStyles';
 import TopRightButton from '../components/TopRightButton';
 import GradientButton from '../components/GradientButton';
 import LinearGradient from 'react-native-linear-gradient';
 import RoundIconWithBackgroundAndCaptionButton from '../components/RoundIconWithBackgroundAndCaptionButton';
 import FriendRequestButton from '../components/FriendRequestButton';
+import LottieView from 'lottie-react-native';
 
 
 const SEARCH_USER_API = "/user/searchUser?idCode="
@@ -37,7 +37,6 @@ export default class AddToCircleScreen extends Component<Props>{
             userIdCodeLoading: true,
             searchInput: "",
             numFriends: 0,
-            showCirclePopup: false,
             showNoUserFound: false,
             showPopup: false,
             recipientName: null,
@@ -226,27 +225,25 @@ export default class AddToCircleScreen extends Component<Props>{
         Utilities.showShortToast(UIStrings.COPIED);
     }
 
-    onCirclePress(){
-        this.setState((prevState)=> ({showCirclePopup: !prevState.showCirclePopup}));
-    }
-
     render()
     {
         return (
             <View style={{flexDirection: 'column', height: "100%", width: '100%'}}>
-            <StatusBar backgroundColor={Constants.APP_THEME_COLORS[0]} />
+            <StatusBar translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
              
              {/* Display the code */}
              <View style={{justifyContent: "center", flexDirection: 'column', position: "absolute", top: 0, height: Constants.SMALL_BANNER_HEIGHT, width: "100%"}}>
               <LinearGradient colors={Constants.APP_THEME_COLORS} style={{justifyContent: "center", flexDirection: 'column', width: '100%', height: '100%'}}>
                   <Text style={styles.inviteLine1}>{UIStrings.SHARE_YOUR_INVITE_CODE}</Text>
                   {
-                  this.state.userIdCodeLoading ? 
-                    <Text style={styles.idCodeLoading}>{UIStrings.LOADING_DOTS}</Text> : 
+                    this.state.userIdCodeLoading ? 
+                    <LottieView style={{alignSelf: 'center', width: '70%', height: 50, marginVertical: 20, marginHorizontal: 10}} 
+                          source={require("../assets/resources/loading.json")} autoPlay loop />
+                    : 
                     <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                         <Text onPress={()=>this.onIdCodePress()} style={styles.inviteLine2}>{this.state.idCode}</Text>
                         <TouchableOpacity onPress={()=>this.onWhatsappPress()} style={{marginTop: 20}}>
-                            <Image  source={require("../assets/logo/whatsapp.png")} style={{marginLeft: 15, alignSelf: 'center', width: 25, height: 25, }}/>
+                            <Image  source={require("../assets/resources/whatsapp.png")} style={{marginLeft: 15, alignSelf: 'center', width: 25, height: 25, }}/>
                         </TouchableOpacity>
                     </View>
                   }
@@ -261,8 +258,11 @@ export default class AddToCircleScreen extends Component<Props>{
               <View style={CommonStyles.popupContainer}>
                 <View style={CommonStyles.popup}>
                   <TopRightButton height={50} color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} iconName="times" onPress={()=>{this.setState({showPopup: false})}} />
+                  {/* <Icon name="users" type="FontAwesome5" style={{padding: 10, alignSelf: 'center', fontSize: 100, color: Constants.APP_THEME_COLORS[0]}}/> */}
+                  <LottieView style={{alignSelf: 'center', width: '70%', height: 100, marginHorizontal: 10}} 
+                  source={require("../assets/resources/send_req.json")} autoPlay loop />
                   <Text style={CommonStyles.popupTitle}>{UIStrings.ADD_TO_CIRCLE}</Text>
-                  <Text style={CommonStyles.popupText}>
+                  <Text style={[CommonStyles.popupText, {fontSize: 13}]}>
                     {UIStrings.SEND_CIRCLE_REQUEST_CONFIRMATION.replace('%', this.state.friendName)}
                   </Text>
                   <View style={{marginBottom: 30}} />
@@ -278,9 +278,9 @@ export default class AddToCircleScreen extends Component<Props>{
                 <Text style={[styles.inviteLine1, {color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}]}>{UIStrings.SEARCH_FRIENDS}</Text>
                                 
                 <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 10}}>
-                    <TextInput placeholder={UIStrings.ENTER_FRIENDS_CODE} placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} 
+                    <TextInput autoCapitalize="characters" placeholder={UIStrings.ENTER_FRIENDS_CODE} placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} 
                                style={styles.input} onChangeText={(val)=>this.setState({searchInput: val})}/>
-                    <Text onPress={()=>this.searchWithIdCode()} style={{paddingLeft: 7, fontFamily: Constants.APP_TITLE_FONT,textAlignVertical: 'center', color: Constants.HEADING_COLOR, fontSize: 15}}>Go</Text>
+                    <Text onPress={()=>this.searchWithIdCode()} style={{paddingLeft: 7, fontFamily: Constants.APP_TITLE_FONT,textAlignVertical: 'center', color: Constants.BRAND_BACKGROUND_COLOR, fontSize: 15}}>Go</Text>
                 </View>
                 {
                     this.state.numFriends < Constants.MAX_NUMBER_IN_CIRCLE ?
@@ -301,12 +301,10 @@ export default class AddToCircleScreen extends Component<Props>{
                             :
                             null
                     }
-                    {
-                        this.state.searching ? 
-                            <Text style={[styles.inviteLine3, {color: Constants.APP_LOADING_COLOR}]}> {UIStrings.LOADING_DOTS}</Text>
-                            : 
-                            null
-                    }
+                    { this.state.searching ? 
+                        <LottieView style={{alignSelf: 'center', width: '70%', height: 80, marginVertical: 20, marginHorizontal: 10}} 
+                        source={require("../assets/resources/loading.json")} autoPlay loop />
+                        : null }
                     {
                         this.state.showNoUserFound ? 
                             <Text style={[styles.inviteLine3, {color: Constants.APP_LOADING_COLOR}]}> {UIStrings.NO_USERS_FOUND_ID}</Text>
@@ -317,20 +315,13 @@ export default class AddToCircleScreen extends Component<Props>{
                </View>
              </View>
 
-            {/* Circle options */}
-            { <CirclePopup  onClose={()=>this.onCirclePress()} isVisible={this.state.showCirclePopup} navigate={this.props.navigation.navigate} />  }
-
               {/* Bottom menu */}
               <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                  <IconWithCaptionButton icon="home" iconType="FontAwesome5" caption={UIStrings.HOME} onPress={()=>NavigationHelpers.clearStackAndNavigate('UserHome', this.props.navigation)} />
-                  <IconWithCaptionButton icon="user" iconType="FontAwesome5" caption={UIStrings.PROFILE} onPress={()=>{this.props.navigation.navigate('Profile')}} />
-                  <TouchableOpacity onPress={()=>this.onCirclePress()} style={{alignContent: 'center', justifyContent: 'center'}}>
-                    <View style={{flexDirection: "column", justifyContent: 'center', marginHorizontal: 5, alignContent: 'center'}}>
-                        <Image source={require('../assets/logo/logo_tp.png')} style={{width: 34, height: 34, borderRadius: 17, alignSelf: 'center'}} />
-                    </View>
-                  </TouchableOpacity>
-                  <IconWithCaptionButton icon="paper-plane" iconType="FontAwesome5" caption={UIStrings.TITLE_CONTACT_US} onPress={()=>{this.props.navigation.navigate('ContactUs')}}/>
-                  <IconWithCaptionButton icon="log-out" iconType="Ionicons" caption={UIStrings.SIGN_OUT} onPress={()=>NavigationHelpers.logout(this.props.navigation) } />
+                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
+                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
               </View>               
              </View>
         );
@@ -373,6 +364,7 @@ const styles = StyleSheet.create({
     },
     input:{
         padding: 12,
+        fontSize: 16,
         width: '90%', 
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
         fontFamily: Constants.APP_BODY_FONT,
@@ -387,6 +379,6 @@ const styles = StyleSheet.create({
         fontFamily: Constants.APP_BODY_FONT,
         fontSize: 12,
         padding: 5,
-        paddingTop: 8
+        marginTop: 14
     }
 })

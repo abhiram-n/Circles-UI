@@ -13,10 +13,9 @@ import IconWithCaptionButton from '../components/IconWithCaptionButton';
 import LinearGradient from 'react-native-linear-gradient';
 import RoundIconWithBackgroundAndCaptionButton from '../components/RoundIconWithBackgroundAndCaptionButton';
 import CommonStyles from '../components/CommonStyles';
-import CirclePopup from "../components/CirclePopup";
 import { FlatList } from 'react-native-gesture-handler';
 import FriendRequestButton from '../components/FriendRequestButton';
-
+import LottieView from 'lottie-react-native'
 
 const GET_USER_ACCESS_REQUESTS = "/accessRequests"
 const REQUESTS_RECEIVED_SUFFIX = "/received"
@@ -31,7 +30,6 @@ export default class AllAccessRequestsScreen extends Component<Props>{
             requests: null,
             loading: true,
             count: 0,
-            showCirclePopup: false
         };
 
     }
@@ -141,38 +139,54 @@ export default class AllAccessRequestsScreen extends Component<Props>{
         this.props.navigation.navigate('AccessRequestInfo', {isUserSender: isUserSender, requestId: item.requestId});
     }
 
-    onCirclePress(){
-        this.setState((prevState)=> ({showCirclePopup: !prevState.showCirclePopup}));
-    }
-
     render()
     {
         return (
             <View style={{flexDirection: 'column', height: "100%", width: '100%'}}>
-            <StatusBar backgroundColor={Constants.APP_THEME_COLORS[0]} />
-             <View style={{justifyContent: "center", flexDirection: 'column', position: "absolute", top: 0, height: Constants.SMALL_BANNER_HEIGHT, width: "100%"}}>
+            <StatusBar translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
+            <TouchableOpacity onPress={()=>this.props.navigation.navigate('SearchCard')} style={{zIndex: 100, position: 'absolute', top: 20, right: 10, borderRadius: 20, width: 40, height: 40, backgroundColor: Constants.SUCCESS_COLOR, justifyContent: 'center'}}>
+                <Icon name="plus" type="FontAwesome5" style={{color: 'white', fontSize: 16, textAlign: 'center'}} />
+            </TouchableOpacity> 
+            
+            {/* Banner */}
+            <View style={{justifyContent: "center", flexDirection: 'column', position: "absolute", top: 0, height: Constants.EXTRA_SMALL_BANNER_HEIGHT, width: "100%"}}>
               <LinearGradient colors={Constants.APP_THEME_COLORS} style={{alignContent: 'center', justifyContent: "center", flexDirection: 'column', width: '100%', height: '100%'}}>
-                <Text style={{textAlign: 'center', marginBottom: 20, fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.ACCESS_CARD_REQUESTS}</Text>
-                <View style={{flexDirection: 'row', alignSelf: 'center'}}>
-                    <TouchableOpacity  onPress={()=>{this.onTogglePress(false)}}
-                        style={[styles.leftButton, this.state.receivedRequestsPressed ? styles.buttonHighlighted : styles.buttonInactive]}>
-                        <Text style={[styles.toggleButtonText, this.state.receivedRequestsPressed ? styles.toggleButtonTextHighlighted : styles.toggleButtonTextInactive]}>Received</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity  onPress={()=>{this.onTogglePress(true)}}
-                        style={[styles.rightButton, this.state.receivedRequestsPressed ? styles.buttonInactive : styles.buttonHighlighted]}>
-                        <Text style={[styles.toggleButtonText, this.state.receivedRequestsPressed ? styles.toggleButtonTextInactive : styles.toggleButtonTextHighlighted]}>Sent</Text>
-                    </TouchableOpacity>
-                </View>
+                <Text style={{textAlign: 'center', marginBottom: 5, fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.ACCESS_CARD_REQUESTS}</Text>
+                <Text style={{textAlign: 'center', marginBottom: 20, fontFamily: Constants.APP_THIN_FONT, fontSize: 14, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>This is a short description for the page</Text>
               </LinearGradient>
-             </View>
-             <View style={{position: "absolute", borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderRadius: 50, bottom: 0, height: Constants.LARGE_ARCH_SCREEN_HEIGHT, width: "100%", backgroundColor: Constants.BACKGROUND_WHITE_COLOR}}>
-                <View style={{marginHorizontal: "5%", paddingTop: "10%"}}>
+            </View>
+
+             {/*  the Arch to display requests */}
+             <View style={{position: "absolute", borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderRadius: 50, bottom: 0, height: Constants.EXTRA_LARGE_ARCH_SCREEN_HEIGHT, width: "100%", backgroundColor: Constants.BACKGROUND_WHITE_COLOR}}>
+                <View style={{marginHorizontal: "5%", marginTop: "5%"}}>
                     {
-                        this.state.loading ? <ActivityIndicator color={Constants.APP_LOADING_COLOR} size="large" />
+                        this.state.loading ? 
+                        <LottieView style={{alignSelf: 'center', width: '70%', height: 100, marginVertical: 20, marginHorizontal: 10}} 
+                        source={require("../assets/resources/loading.json")} autoPlay loop />
                         :
                         <View style={{flexDirection: 'column'}}>
-                            <Text style={{textAlign: 'center', fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 18, padding: 10, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.NUM_REQUESTS}{this.state.count}</Text>
-                            {this.state.count == 0 ? <Text style={styles.noPostsText}>{UIStrings.TIP_EXPAND_CIRCLE_INCREASE_ACTIVITY}</Text> : null}
+                            {/* The toggle button */}
+                            <View style={{flexDirection: 'row', alignSelf: 'center', marginBottom: 5}}>
+                                <TouchableOpacity  onPress={()=>{this.onTogglePress(false)}}
+                                    style={[styles.leftButton, this.state.receivedRequestsPressed ? styles.buttonHighlighted : styles.buttonInactive]}>
+                                    <Text style={[styles.toggleButtonText, this.state.receivedRequestsPressed ? styles.toggleButtonTextHighlighted : styles.toggleButtonTextInactive]}>Received</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity  onPress={()=>{this.onTogglePress(true)}}
+                                    style={[styles.rightButton, this.state.receivedRequestsPressed ? styles.buttonInactive : styles.buttonHighlighted]}>
+                                    <Text style={[styles.toggleButtonText, this.state.receivedRequestsPressed ? styles.toggleButtonTextInactive : styles.toggleButtonTextHighlighted]}>Sent</Text>
+                                </TouchableOpacity>
+                            </View>     
+
+                            {this.state.count == 0 ? <Text style={styles.noPostsText}>{this.state.receivedRequestsPressed ? UIStrings.TIP_EXPAND_CIRCLE_INCREASE_ACTIVITY : UIStrings.DISCOVER_CARDS_AND_SEND_ACCESS_REQUEST}</Text> : null}
+                            {this.state.count == 0  ? 
+                                <View style={{marginTop: 30, alignSelf: 'center', alignContent: 'center'}}>
+                                    <RoundIconWithBackgroundAndCaptionButton icon="plus" iconType="FontAwesome5" 
+                                    colors={Constants.APP_THEME_COLORS} onPress={()=>{this.props.navigation.navigate('SearchCard')}} 
+                                    textColor={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} caption={UIStrings.NEW} />
+                                </View>
+                                : 
+                                null
+                            }
                             <FlatList
                                 contentContainerStyle={{alignItems: 'center'}}
                                 data={this.state.requests}
@@ -187,20 +201,13 @@ export default class AllAccessRequestsScreen extends Component<Props>{
                 </View>
              </View>
 
-            {/* Circle options */}
-            { <CirclePopup  onClose={()=>this.onCirclePress()} isVisible={this.state.showCirclePopup} navigate={this.props.navigation.navigate} />  }
-
               {/* Bottom menu */}
               <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                  <IconWithCaptionButton icon="home" iconType="FontAwesome5" caption={UIStrings.HOME} onPress={()=>NavigationHelpers.clearStackAndNavigate('UserHome', this.props.navigation)} />
-                  <IconWithCaptionButton icon="user" iconType="FontAwesome5" caption={UIStrings.PROFILE} onPress={()=>{this.props.navigation.navigate('Profile')}} />
-                  <TouchableOpacity onPress={()=>this.onCirclePress()} style={{alignContent: 'center', justifyContent: 'center'}}>
-                    <View style={{flexDirection: "column", justifyContent: 'center', marginHorizontal: 5, alignContent: 'center'}}>
-                        <Image source={require('../assets/logo/logo_tp.png')} style={{width: 34, height: 34, borderRadius: 17, alignSelf: 'center'}} />
-                    </View>
-                  </TouchableOpacity>
-                  <IconWithCaptionButton icon="paper-plane" iconType="FontAwesome5" caption={UIStrings.TITLE_CONTACT_US} onPress={()=>{this.props.navigation.navigate('ContactUs')}}/>
-                  <IconWithCaptionButton icon="log-out" iconType="Ionicons" caption={UIStrings.SIGN_OUT} onPress={()=>NavigationHelpers.logout(this.props.navigation) } />
+                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
+                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
               </View>             
              </View>
         );
@@ -221,40 +228,40 @@ const styles = StyleSheet.create({
     },
     leftButton:{
         alignSelf: 'center',
-        borderWidth: 1, 
-        borderColor: Constants.BACKGROUND_WHITE_COLOR, 
-        width: 120, 
-        height: 50, 
-        borderBottomLeftRadius: 25, 
+        borderWidth: 0.5,
+        borderColor: Constants.BRAND_BACKGROUND_COLOR,
+        width: 100,
+        height: 40,
+        borderBottomLeftRadius: 25,
         borderTopLeftRadius: 25
     },
     buttonHighlighted:{
-        backgroundColor: Constants.BACKGROUND_WHITE_COLOR, 
+        backgroundColor: Constants.BRAND_BACKGROUND_COLOR,
     },
     buttonInactive:{
-        backgroundColor: 'transparent', 
+        backgroundColor: 'transparent',
     },
     rightButton:{
-        alignSelf: 'center', 
-        borderWidth: 1, 
-        borderColor: Constants.BACKGROUND_WHITE_COLOR, 
-        width: 120, 
-        height: 50, 
-        borderBottomRightRadius: 25, 
+        alignSelf: 'center',
+        borderWidth: 0.5,
+        borderColor: Constants.BRAND_BACKGROUND_COLOR,
+        width: 100,
+        height: 40,
+        borderBottomRightRadius: 25,
         borderTopRightRadius: 25
     },
     toggleButtonText:{
         textAlign: 'center',
         padding: 10,
-        fontFamily: Constants.APP_BODY_FONT,
-        fontSize: 18,
+        fontFamily: Constants.APP_TITLE_FONT,
+        fontSize: 14,
+        height: '100%'
     },
     toggleButtonTextHighlighted:{
-        color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
-        fontFamily: Constants.APP_TITLE_FONT
+        color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND
     },
     toggleButtonTextInactive:{
-        color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND
+        color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
     },
     input:{
         padding: 12,
@@ -271,7 +278,7 @@ const styles = StyleSheet.create({
         textAlign: 'center', 
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
         fontFamily: Constants.APP_BODY_FONT,
-        fontSize: 13,
+        fontSize: 12,
         padding: 5 
     }
 })

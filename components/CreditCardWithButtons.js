@@ -9,8 +9,8 @@ import TextTicker from "react-native-text-ticker"
 
 const CreditCardWithButton = ({colors, size, title, subtitle, leftButtonParams, rightButtonParams }) => (
     <View style={styles.container}>
-        <ImageBackground source={require("../assets/logo/Card_Pattern.png")}  style={{width: "100%", height: "100%", flex: 1}}>
-        <LinearGradient colors={colors} style={styles.gradient}>
+        <ImageBackground source={require("../assets/resources/new_card_2.png")}  style={{width: "100%", height: "100%", flex: 1}}>
+        {/* <LinearGradient colors={colors} style={styles.gradient}> */}
             <View style={styles.titleContainer}>
                 <View style={{alignContent: 'center', alignSelf: 'center', paddingHorizontal: '8%', paddingTop: 15}}>
                     <TextTicker  style={styles.title} loop bounce duration={5000} repeatSpacer={50} marqueeDelay={1000}>{title}</TextTicker>
@@ -27,7 +27,7 @@ const CreditCardWithButton = ({colors, size, title, subtitle, leftButtonParams, 
                     <Text style={styles.buttonText}>{rightButtonParams.caption}</Text>
                 </TouchableOpacity>
             </View>
-        </LinearGradient>
+        {/* </LinearGradient> */}
         </ImageBackground>
    </View>
 )
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     container: {
         width: 290,
         height: 185,
-        marginHorizontal: 10,
+        margin: 10,
         borderRadius: 12,
         overflow: 'hidden'
     },
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     buttonText:{
         textAlign: 'center',
         color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
-        fontFamily: Constants.APP_BODY_FONT,
+        fontFamily: Constants.APP_TITLE_FONT,
         fontSize: 12
     },
     icon:{

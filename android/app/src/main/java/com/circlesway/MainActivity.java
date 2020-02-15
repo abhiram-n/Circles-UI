@@ -24,7 +24,7 @@ import android.util.Log;
 
 
 public class MainActivity extends ReactActivity {
-
+    private static final NOTIFICAITON_CHANNEL_ID = "circlesWay"
 
     /**
      * Returns the name of the main component registered from JavaScript. This is
@@ -42,7 +42,7 @@ public class MainActivity extends ReactActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Circles";
             String description = "Circles Notifications";
-            NotificationChannel channel = new NotificationChannel("circlesWay", name, NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel channel = new NotificationChannel(NOTIFICAITON_CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription(description);
             channel.setBypassDnd(true);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
@@ -62,20 +62,6 @@ public class MainActivity extends ReactActivity {
             // or other notification behaviors after this
             NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(channel);
-            // String message = "Hello";
-            // NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channel.getId())
-            // .setAutoCancel(true)
-            // .setSmallIcon(R.drawable.ic_stat_name)
-            // .setColor(ContextCompat.getColor(this, R.color.colorAccent))
-            // .setContentTitle("Circles")
-            // .setSound(Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.notification))
-            // .setDefaults(Notification.DEFAULT_VIBRATE)
-
-            // .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
-            // .setContentText(message);
-            
-            // Notification notification = builder.build();
-            // notificationManager.notify(1, notification);
         }
     }
 
@@ -105,10 +91,14 @@ public class MainActivity extends ReactActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        // SplashScreen.show(this, R.style.SplashScreenTheme); 
+        setTheme(R.style.AppTheme); // Now set the theme from Splash to App before setContentView
+        setContentView(R.layout.launch_screen); // Then inflate the new view
+        SplashScreen.show(this, R.style.SplashScreenTheme); // Now show the splash screen. Hide it later in JS
         getPermission(android.Manifest.permission.ACCESS_NOTIFICATION_POLICY);
         getPermission(android.Manifest.permission.VIBRATE);
         getPermission(android.Manifest.permission.WRITE_SETTINGS);
+        super.onCreate(savedInstanceState);
         createNotificationChannel();
     }
 }

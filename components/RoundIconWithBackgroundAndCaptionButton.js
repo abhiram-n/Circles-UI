@@ -5,57 +5,59 @@ import { Button, Icon } from "native-base";
 import LinearGradient from "react-native-linear-gradient";
 import firebase from "react-native-firebase";
 
-const RoundIconWithBackgroundAndCaptionButton = ({colors, isLarge, caption, icon, iconType, onPress, textColor, thinFont}) => (
+const RoundIconWithBackgroundAndCaptionButton = ({colors, isLarge, caption, icon, iconType, onPress, isLight, thinFont}) => (
     <TouchableOpacity style={[styles.container, isLarge ? styles.containerMedium : styles.containerSmall]} onPress={onPress}>
         <LinearGradient colors={colors} start={{x:0, y:1}} end={{x:1, y:1}} style={[styles.circle, isLarge ? styles.circleMedium : styles.circleSmall]}>
-            <Icon name={icon} type={iconType} style={[styles.icon, isLarge ? styles.iconMedium : styles.iconSmall]}/>
+            <Icon name={icon} type={iconType} style={[styles.icon, 
+                                                      isLarge ? styles.iconMedium : styles.iconSmall, 
+                                                      {color: isLight ? Constants.BRAND_BACKGROUND_COLOR : Constants.LIGHT_ICON_COLOR}]}/>
         </LinearGradient>
-        <Text numberOfLines={1} style={[styles.caption, 
-                                        {fontFamily: thinFont ? Constants.APP_THIN_FONT : Constants.APP_BODY_FONT  },
+        <Text numberOfLines={2} style={[styles.caption, 
+                                        {color: isLight ? Constants.TEXT_COLOR_FOR_DARK_BACKGROUND : Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND},
+                                        {fontFamily: thinFont ? Constants.APP_BODY_FONT : Constants.APP_SUBTITLE_FONT  },
                                         isLarge ? styles.captionMedium : styles.captionSmall]}>{caption} </Text>
    </TouchableOpacity>
 )
 
 const styles = StyleSheet.create({
     caption:{
-        color: 'black',
         textAlign: 'center',
     },
     captionSmall:{
-      fontSize: 12,
+      fontSize: 14.5,
       paddingTop: 3 
     },
     captionMedium:{
-      fontSize: 15,
+      fontSize: 17,
       paddingTop: 6 
     },
     circle:{ 
         alignSelf: 'center'
       },
     circleSmall:{
-      width: 50, 
-      height: 50, 
-      borderRadius: 25,
+      width: 80, 
+      height: 80, 
+      borderRadius: 40,
     },
     circleMedium:{
-      width: 100, 
-      height: 100, 
-      borderRadius: 55,
+      width: 120, 
+      height: 120, 
+      borderRadius: 60,
     },
     container:{
         flexDirection: 'column', 
         alignContent: 'center', 
         justifyContent: 'center',
+        margin: 10
     },
     containerSmall:{
-      width: 70
+      width: 100
     },
     containerMedium:{
       width: 120
     },
     icon:{
         alignSelf: 'center', 
-        color: Constants.LIGHT_ICON_COLOR, 
         justifyContent: 'center',
         flex: 1,
         alignItems: 'center',
@@ -63,10 +65,10 @@ const styles = StyleSheet.create({
         textAlignVertical: "center"
     },
     iconSmall:{
-      fontSize: 22,
+      fontSize: 28,
     },
     iconMedium:{
-      fontSize: 30,
+      fontSize: 40,
     }
 });
 

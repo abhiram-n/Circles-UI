@@ -31,7 +31,7 @@ export default class NotesFromFoundersScreen extends Component<Props>{
     {
         return(
             <View style={{flexDirection: 'column', height: "100%", width: '100%' }}>
-                <StatusBar translucent backgroundColor='transparent' />
+            <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
                 <View style={{height: '20%', borderBottomRightRadius: 50, backgroundColor: '#0000BD'}} />
                 <TopLeftButton iconName={Constants.ICON_BACK_BUTTON} color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} onPress={()=>this.props.navigation.goBack()} />
                 <View style={{height: '90%', flexDirection: 'column'}} >
@@ -43,11 +43,11 @@ export default class NotesFromFoundersScreen extends Component<Props>{
                             </Text>
                             <View style={{flexDirection: 'row', justifyContent:'center', marginTop: 20}}>
                                 <View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 20}}>
-                                    <Image source={require("../assets/logo/Small_Anchal.jpg")} style={{marginBottom: 10, alignSelf: 'center', width:50, height: 50, borderRadius: 25, overflow: 'hidden'}} />
+                                    <Image source={require("../assets/resources/Small_Anchal.jpg")} style={{marginBottom: 10, alignSelf: 'center', width:50, height: 50, borderRadius: 25, overflow: 'hidden'}} />
                                     <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, textAlign: 'center', fontFamily: Constants.APP_BODY_FONT}}>{UIStrings.ANCHAL}</Text>
                                 </View>
                                 <View style={{flexDirection: 'column', justifyContent: 'center'}}>
-                                    <Image source={require("../assets/logo/Small_Abhiram.jpg")} style={{marginBottom: 10, alignSelf: 'center', width:50, height: 50, borderRadius: 25, overflow: 'hidden'}} />
+                                    <Image source={require("../assets/resources/Small_Abhiram.jpg")} style={{marginBottom: 10, alignSelf: 'center', width:50, height: 50, borderRadius: 25, overflow: 'hidden'}} />
                                     <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, textAlign: 'center', fontFamily: Constants.APP_BODY_FONT}}>{UIStrings.ABHIRAM}</Text>
                                 </View>
 

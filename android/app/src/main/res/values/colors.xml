@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#039BE5</color>
     <color name="colorPrimaryDark">#0288D1</color>
-    <color name="colorAccent">#113c55</color>
+    <color name="colorAccent">#AF2BED</color>
     <color name="darkBlue">#001689</color>
     <color name="primary_dark">#001689</color>
     <color name="blue_grey_500">#607D8B</color>
@@ -10,4 +10,6 @@
     <color name="blue_grey_700">#455A64</color>
     <color name="blue_grey_800">#37474F</color>
     <color name="blue_grey_900">#263238</color>
+    <color name="status_bar_color">#001689</color>
+    <color name="colorSecondary">#ffffff</color>
 </resources>

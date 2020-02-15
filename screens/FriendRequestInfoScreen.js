@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
+import {Platform, StyleSheet, Text, View, Image, TouchableOpacity, ScrollView} from 'react-native';
 import { ActivityIndicator, Picker, TextInput, StatusBar } from 'react-native';
 import {Button, Fab, Icon} from 'native-base';
 import {createStackNavigator, createAppContainer} from 'react-navigation';
@@ -15,8 +15,8 @@ import TopLeftButton from '../components/TopLeftButton';
 import RoundImageWithCaptionButton from '../components/RoundImageWithCaptionButton';
 import CreditCardWithText from '../components/CreditCardWithText';
 import IconWithCaptionButton from '../components/IconWithCaptionButton';
-import CirclePopup from '../components/CirclePopup';
 import RowWithTextLeftAndRight from '../components/RowWithTextLeftAndRight';
+import LottieView from 'lottie-react-native';
 
 const GET_FRIEND_REQUEST_INFO_API = "/friendRequests?id=";
 const RESPOND_TO_REQUEST_API = "/friendRequests/respond"
@@ -27,7 +27,6 @@ export default class FriendRequestInfoScreen extends Component<Props>{
     {
         super(props);
         this.state = {
-            showCirclePopup: false,
             loading: true,
             partnerName: null,
             partnerId: null, 
@@ -52,10 +51,6 @@ export default class FriendRequestInfoScreen extends Component<Props>{
 
     componentWillUnmount(){
         this._isMounted = false;
-    }
-
-    onCirclePress(){
-        this.setState((prevState)=> ({showCirclePopup: !prevState.showCirclePopup}));
     }
 
     async getRequestDetails(){
@@ -167,17 +162,23 @@ export default class FriendRequestInfoScreen extends Component<Props>{
     render()
     {
         return (
-        <View style={styles.container}>
-            <StatusBar translucent backgroundColor={Constants.BACKGROUND_WHITE_COLOR} />
+        <ScrollView contentContainerStyle={{flexGrow:1}} style={styles.container}>
+            <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
             {/* The title */}
-            <View style={{height: "7%", flexDirection: 'row', justifyContent: 'center', alignContent: 'center', }}>
+            <View style={{height: "10%", flexDirection: 'row', justifyContent: 'center', alignContent: 'center', }}>
                 <Text style={{fontFamily: Constants.APP_TITLE_FONT, fontSize: 18, textAlignVertical:'center', textAlign: 'center', color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.REQUEST_ADD_TO_CIRCLE}</Text>
             </View>
 
-            { this.state.loading ? <ActivityIndicator size="large" color={Constants.APP_LOADING_COLOR} /> : null }
+            { 
+                this.state.loading ? 
+                <LottieView style={{alignSelf: 'center', width: '70%', height: 100, marginVertical: 20, marginHorizontal: 10}} 
+                source={require("../assets/resources/loading.json")} autoPlay loop />
+                : 
+                null 
+            }
            
             {/* Request details */}
-            <View style={{flex:1, height: "93%", borderTopLeftRadius: 40, borderTopRightRadius: 40, width: '100%'}}>
+            <View style={{flex:1, height: "90%", borderTopLeftRadius: 40, borderTopRightRadius: 40, width: '100%'}}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-evenly', width: '100%'}}>
                     <RoundImageWithCaptionButton isLarge={true}  imgUri={this.state.partnerImgUrl} />
                 </View>
@@ -197,7 +198,7 @@ export default class FriendRequestInfoScreen extends Component<Props>{
                 {/* If the request is active, present the options to recipient */}
                 { 
                     this.state.status == Constants.FRIEND_REQUEST_ACTIVE && !this.isUserSender ? 
-                      <View style={{backgroundColor: Constants.BACKGROUND_WHITE_COLOR, marginTop: 20, borderWidth: 2, borderColor: Constants.BACKGROUND_GREY_COLOR, borderRadius: 20, justifyContent: 'center', alignSelf: 'center', width: '90%', height: 160, flexDirection: 'column'}}>
+                      <View style={{backgroundColor: Constants.BACKGROUND_WHITE_COLOR, marginTop: 20, borderWidth: 2, borderColor: Constants.APP_THEME_COLORS[1], borderRadius: 20, justifyContent: 'center', alignSelf: 'center', width: '90%', height: 160, flexDirection: 'column'}}>
                         <TouchableOpacity onPress={()=>this.respondToRequest(Constants.FRIEND_REQUEST_ACCEPTED)} style={{flexDirection: 'row', padding: 10}}>
                             <Icon name="rocket" type="FontAwesome5" style={[styles.icon, {color: Constants.SUCCESS_COLOR}]} />
                             <View style={{flexDirection: 'column', alignSelf: 'center'}}>
@@ -205,7 +206,7 @@ export default class FriendRequestInfoScreen extends Component<Props>{
                                 <Text style={styles.responseButtonSubtitle}>{UIStrings.ADDED_TO_CIRCLES}</Text>
                             </View>
                         </TouchableOpacity>
-                        <View style={{borderBottomWidth: 1, marginVertical: 8, borderColor: Constants.BACKGROUND_GREY_COLOR, width: '90%', alignSelf: 'center'}} />
+                        <View style={{borderBottomWidth: 1, marginVertical: 8, borderColor: Constants.APP_THEME_COLORS[1], width: '90%', alignSelf: 'center'}} />
                         <TouchableOpacity onPress={()=>this.respondToRequest(Constants.FRIEND_REQUEST_DECLINED)} style={{flexDirection: 'row', padding: 10}}>
                             <Icon name="meteor" type="FontAwesome5" style={[styles.icon, {color: 'red'}]} />
                             <View style={{flexDirection: 'column', alignSelf: 'center'}}>
@@ -218,33 +219,25 @@ export default class FriendRequestInfoScreen extends Component<Props>{
                     null 
                 }  
 
-            {/* Circle options */}
-            { <CirclePopup  onClose={()=>this.onCirclePress()} isVisible={this.state.showCirclePopup} navigate={this.props.navigation.navigate} />  }
             </View>
 
             {/* Bottom menu */}
             <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 100, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: 60, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="FontAwesome5" caption={UIStrings.HOME} onPress={()=>NavigationHelpers.clearStackAndNavigate('UserHome', this.props.navigation)}/>
-                <IconWithCaptionButton icon="user" iconType="FontAwesome5" caption={UIStrings.PROFILE} onPress={()=>{this.props.navigation.navigate('Profile')}} />
-                <TouchableOpacity onPress={()=>this.onCirclePress()} style={{alignContent: 'center', justifyContent: 'center'}}>
-                  <View style={{flexDirection: "column", justifyContent: 'center', marginHorizontal: 5, alignContent: 'center'}}>
-                    <Image source={require('../assets/logo/logo_tp.png')} style={{width: 34, height: 34, borderRadius: 17, alignSelf: 'center'}} />
-                  </View>
-                </TouchableOpacity>
-                <IconWithCaptionButton icon="paper-plane" iconType="FontAwesome5" caption={UIStrings.TITLE_CONTACT_US} onPress={()=>{this.props.navigation.navigate('ContactUs')}}/>
-                <IconWithCaptionButton icon="log-out" iconType="Ionicons" caption={UIStrings.SIGN_OUT} onPress={()=>NavigationHelpers.logout(this.props.navigation) } />
+                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
+                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
             </View>
-        </View>
+        </ScrollView>
         );
     }
 }
 
 const styles = StyleSheet.create({
     container:{
-        flex:1, 
         width: '100%',
         height: '100%',
-        backgroundColor: Constants.BACKGROUND_WHITE_COLOR
     },
     icon:{
         width: 50, 

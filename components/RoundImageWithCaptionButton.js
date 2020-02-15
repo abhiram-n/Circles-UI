@@ -7,15 +7,21 @@ import firebase from "react-native-firebase";
 
 const RoundImageWithCaptionButton = ({caption, subtitle, isLarge, imgUri, onPress}) => (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-        <Image resizeMethod="resize" source={{uri: imgUri}} style={isLarge ? styles.circleLarge : styles.circleSmall} />
-        <Text numberOfLines={1} style={[styles.caption]}>{caption}</Text>
-        <Text numberOfLines={1} style={[styles.subtitle]}>{subtitle}</Text>
+        <Image defaultSource={require('../assets/resources/default_user.png')} source={{uri: imgUri}} style={isLarge ? styles.circleLarge : styles.circleSmall} />
+        {caption != null ?
+          <Text numberOfLines={1} style={styles.caption}>{caption}</Text>
+          :
+          null}
+        {subtitle != null ?
+          <Text numberOfLines={1} style={[styles.subtitle]}>{subtitle}</Text>
+          : 
+          null}
    </TouchableOpacity>
 )
 
 const styles = StyleSheet.create({
     caption:{
-        color: 'black',
+        color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
         fontSize: 15,
         fontFamily: Constants.APP_SUBTITLE_FONT,
         textAlign: 'center',
@@ -26,14 +32,16 @@ const styles = StyleSheet.create({
         height: 80, 
         borderRadius: 40, 
         alignSelf: 'center',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backgroundColor: Constants.IMAGE_DEFAULT_BKGD_COLOR
       },
       circleLarge:{
         width: 120, 
         height: 120, 
         borderRadius: 60, 
         alignSelf: 'center',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backgroundColor: Constants.IMAGE_DEFAULT_BKGD_COLOR,
       },
       container:{
         flexDirection: 'column', 

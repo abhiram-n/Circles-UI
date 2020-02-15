@@ -15,6 +15,7 @@ import RoundIconWithBackgroundAndCaptionButton from "../components/RoundIconWith
 import TopLeftButton from "../components/TopLeftButton";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import GradientButton from "../components/GradientButton";
+import { virgilCrypto } from "react-native-virgil-crypto";
 
 
 const PHONE_VERIFIED_LOGIN_API = "/auth/phoneAuthLogin";
@@ -40,7 +41,6 @@ export default class LogInScreen extends Component<Props> {
   componentDidMount() {
     // Get the device token
     this._isMounted = true;
-    changeNavigationBarColor(Constants.BACKGROUND_WHITE_COLOR);
     firebase.messaging().getToken()
       .then(value => {
         AuthHelpers.setDeviceToken(value);
@@ -80,38 +80,34 @@ export default class LogInScreen extends Component<Props> {
   }
 
   async sendCodeToPhone(){
-    // TEST: the manual OTP
-    // ABout your circle popup must contain something about your circle.. like avg number of cards/user
-    // TEST: app hash changes?
-    // TEST: chat bkgd
-    // TEST: Posts, AR, FR sort the requests, posts when displaying
-    // check all todos in server and client
     // TEST: Cards colors
-    // OO Messages are sometimes not sorted on chat
+    // check all todos in server and client
     // set up how it works
     // OO make stronger chat firebase database rules
-    // TEST: Chat slow
-    // TEST handle second degree flow. in search results, display name of friend + sec degree friend + card
-    // notification icon and the photo on the right for notifications
-    // TEST Communicate and handle the 10 person rule (add to circle screen)
-    // TEST and Brainstorm :searching cardholders must account for tags
-    // on accessrequests and FR and posts screen, last item in list is partially invisible
-    // fix ui for info screens, edit cards on profile screen
-    // OO setup the signup flow with welcome screen and invite code
-    // make the view on info screens scrollable
     // REMOVE THE CLEAR TEXT TRAFIC AFTER TESTING
-    // TEST on anchals screen some divs are showing shadows (check search card screen)
-    // check strings with anchal, notifications, errors etc.
-    // improve the design of the popups (esp Accesws Req) and increase the opacityso that it stands out (does not stand out)
+    // check strings with anchal, notifications, errors etc: Too much text in sign up image access (Sakshi), 'Send or view announcements in your Circle' -> Broadcasts
     // Privacy policy: info we collect
     // Add tags on playstore console
     // password protect the cred file
-    // slow splash screen in app.js
     // reset the founders password
+    // notes from founders
+    // navbar and status bar colors 
     // OO SSL connection for RDB
     // redirect getcircles.in to new app
-    // decompile and see apk
 
+    // TEST:
+    // TEST: Lottie files
+    // TEST: The signup flow with welcome screen and invite code
+    // TEST: Prompt for chat when acepting
+    // TEST: In Sent AR and FR add a button in the middle to direct people to different screens
+    // TEST: Declining AR sends notification but does nothign on the UI
+    // TEST handle second degree flow. in search results, display name of friend + sec degree friend + card
+    // TEST: app hash changes?
+    // TEST Communicate and handle the 10 person rule (add to circle screen)
+    // TEST and Brainstorm :searching cardholders must account for tags
+    // TEST: Search for regalia. sakshi is showing up in 2nd degree. She does not have the card and she is in my circle
+    // TEST: notes/comment on the access request creation 
+    
     // Start the SMS listener
     try{
       if (this.newListenerNeeded){
@@ -149,9 +145,7 @@ export default class LogInScreen extends Component<Props> {
 
             // If its been a while, then open the manual otp
             setTimeout(()=>{
-              console.log('Timeout');
               if(!this.state.showManualCodeEntry && this._isMounted){
-                console.log('Setting the code entry');
                 this.setState({showManualCodeEntry: true, statusMessage: UIStrings.OPTIONALLY_ENTER_OTP})
               }
             }, Constants.DELAY_BEFORE_MANUAL_OTP)
@@ -199,7 +193,6 @@ export default class LogInScreen extends Component<Props> {
             this.setState({statusMessage: UIStrings.INCORRECT_CODE_ENTERED, disableVerify: false});
           }
           else{
-            this.setState({statusMessage: UIStrings.PHONE_VERIFIED});
             this.logIn();
           }
         }
@@ -217,7 +210,7 @@ export default class LogInScreen extends Component<Props> {
   }
 
   async logIn(){
-    this.setState({statusMessage: UIStrings.LOGGING_YOU_IN});
+    this.setState({statusMessage: UIStrings.VERIFIED_LOGGING_YOU_IN});
     fetch(Constants.SERVER_ENDPOINT + PHONE_VERIFIED_LOGIN_API, {
       method: Constants.POST_METHOD,
       headers:{ "Content-Type": Constants.APPLICATION_JSON },
@@ -243,9 +236,10 @@ export default class LogInScreen extends Component<Props> {
     }).
     then((responseJson)=>{
       if (responseJson != null){
-        AuthHelpers.setTokenIdPhone(responseJson.access_token, responseJson.id, responseJson.phoneNumber);
-        let params = { initializeEncryption: true }
-        NavigationHelpers.clearStackAndNavigateWithParams("UserHome", this.props.navigation, params);
+        AuthHelpers.setTokenIdPhone(responseJson.access_token, responseJson.id, responseJson.phoneNumber).then(()=>{
+          let params = { initializeEncryption: true }
+          NavigationHelpers.clearStackAndNavigateWithParams("UserHome", this.props.navigation, params);
+        })
     }})
     .catch((err)=>{
       if (!this._isMounted){
@@ -294,9 +288,9 @@ export default class LogInScreen extends Component<Props> {
 
   render() {
     return (
-      <View style={{flexDirection: 'column', height: "100%", width: '100%'}}>
-      <StatusBar translucent backgroundColor='transparent' />
-      <TopLeftButton iconName={Constants.ICON_BACK_BUTTON} onPress={()=>this.props.navigation.goBack()} color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} />
+      <View style={{flexDirection: 'column', height: "100%", width: '100%', backgroundColor: Constants.BRAND_BACKGROUND_COLOR}}>
+      <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
+      <TopLeftButton iconName={Constants.ICON_BACK_BUTTON} onPress={()=>this.props.navigation.goBack()} color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} />
       <View style={{flexDirection: 'column', alignSelf: 'center', justifyContent: 'center', flex: 1, padding: 20, width: '90%'}}>
          <Text style={styles.title}>{UIStrings.WELCOME_BACK}</Text>
           
@@ -308,7 +302,7 @@ export default class LogInScreen extends Component<Props> {
                 defaultValue={this.state.countryCode} keyboardType="number-pad" onChangeText={val => this.onCountryCodeChange(val)}
                 maxLength={Constants.COUNTRY_CODE_MAX_LENGTH}
                 placeholderTextColor={ Constants.APP_PLACEHOLDER_TEXT_COLOR  }
-                style={{ fontSize: 24, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }} />
+                style={{ fontSize: 24, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: "Montserrat-Thin" }} />
             </InputGroup>
             <InputGroup style={{width: '75%'}} error={!this.state.phoneSuccess}>
               <Input
@@ -317,7 +311,7 @@ export default class LogInScreen extends Component<Props> {
                maxLength={Constants.PHONE_NUMBER_MAX_LENGTH}
                placeholder={UIStrings.PLACEHOLDER_ENTER_PHONE}
                placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
-               style={{fontSize: 24, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }} />
+               style={{fontSize: 24, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: "Montserrat-Thin" }} />
               <Icon name={ this.state.phoneSuccess ? Constants.ICON_CHECKMARK : null } style={styles.checkmark} />
             </InputGroup>
           </View>
@@ -329,7 +323,7 @@ export default class LogInScreen extends Component<Props> {
             <Text style={styles.enterOTP}>{UIStrings.ENTER_OTP}</Text>
             <TextInput onChangeText={val=>this.onChangeManualOTP(val)} 
               keyboardType="number-pad" maxLength= {Constants.VERIFICATION_CODE_LENGTH}
-              style={{fontSize: 26, borderBottomColor: Constants.HEADING_COLOR, borderBottomWidth: 0.5, width: 180, padding: 5, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_BODY_FONT}} />
+              style={{fontSize: 26, borderBottomColor: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, borderBottomWidth: 0.5, width: 180, padding: 5, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: Constants.APP_BODY_FONT}} />
           </View>
           : null }
 
@@ -338,7 +332,7 @@ export default class LogInScreen extends Component<Props> {
 
           {/* Bottom buttons */}
           <View style={{marginTop: 30, flexDirection: 'row', justifyContent: 'center', alignSelf: 'center'}}>
-              <GradientButton isLarge={true} title={this.state.disableVerify ? UIStrings.TITLE_VERIFYING : UIStrings.TITLE_VERIFY} onPress={()=>this.onNextPress()}/>
+              <GradientButton isLarge isLight colors={Constants.DEFAULT_GRADIENT} title={this.state.disableVerify ? UIStrings.TITLE_VERIFYING : UIStrings.TITLE_VERIFY} onPress={()=>this.onNextPress()}/>
           </View> 
        </View>
       </View>
@@ -354,7 +348,7 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   title:{
-    color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
+    color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
     fontFamily: Constants.APP_THIN_FONT,
     fontSize: 45,
     marginBottom: 40,
@@ -390,7 +384,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textAlignVertical: 'center',
     fontFamily: Constants.APP_THIN_FONT,
-    color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
+    color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
     fontSize: 20
   }
 });

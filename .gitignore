@@ -63,3 +63,5 @@ CommentedOut.txt
 backuppath.txt
 certificate.jks
 __tests__/App-test.js
+android/app/src/main/assets/index.android.bundle
+android/app/src/main/assets/index.android.bundle

@@ -105,8 +105,8 @@ android {
         applicationId "com.plankton.circles"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "0.2"
+        versionCode 6
+        versionName "0.5"
     }
     signingConfigs {
         release {
@@ -149,6 +149,7 @@ android {
 }
 
 dependencies {
+    implementation project(':lottie-react-native')
     implementation project(':react-native-splash-screen')
     implementation project(':react-native-image-resizer')
     implementation project(':react-native-virgil-crypto')
@@ -162,6 +163,9 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     implementation "com.facebook.react:react-native:+"  // From node_modules
+
+    // For animated GIF support 
+    compile 'com.facebook.fresco:animated-gif:1.10.0'
 
     // Firebase dependencies
     implementation "com.google.android.gms:play-services-base:16.1.0"

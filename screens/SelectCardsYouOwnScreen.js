@@ -27,7 +27,8 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
         this.state = {
             selectedCards: [],
             showCardsAddedLabel: false,
-            allCards: this.props.navigation.getParam("cards", Constants.NONE)
+            allCards: this.props.navigation.getParam("cards", Constants.NONE),
+            submitButtonLabel: UIStrings.SKIP_AND_SUBMIT
         };
 
         this.phoneNumber = this.props.navigation.getParam("phoneNumber", Constants.NONE);
@@ -135,9 +136,11 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
     }
 
     onSignUpComplete(access_token, id, phoneNumber) {
-      AuthHelpers.setTokenIdPhone(access_token, id, phoneNumber);
-      let params = { initializeEncryption: true }
-      NavigationHelpers.clearStackAndNavigateWithParams("UserHome", this.props.navigation, params);
+      AuthHelpers.setTokenIdPhone(access_token, id, phoneNumber).then(()=>{
+        let params = { initializeEncryption: true, askNotification: true }
+        NavigationHelpers.clearStackAndNavigateWithParams("UserHome", this.props.navigation, params);
+      })
+
     }
 
     getCardsAddedText(){
@@ -146,7 +149,7 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
 
     onSelectCardItem(item) {
       if (this.state.selectedCards.length == 0){
-        this.setState({showCardsAddedLabel: true});
+        this.setState({showCardsAddedLabel: true, submitButtonLabel: UIStrings.TITLE_SUBMIT});
       }
 
         if (!this.state.selectedCards.includes(item)) {
@@ -167,23 +170,22 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
  
     render(){
         return(
-        <View style={{backgroundColor: Constants.BACKGROUND_WHITE_COLOR, height: '100%', width: '100%'}}>
-        <StatusBar translucent backgroundColor='transparent' />
+        <View style={{backgroundColor: Constants.BRAND_BACKGROUND_COLOR, height: '100%', width: '100%'}}>
+        <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
             <View style={{width: "100%", marginTop: 40}}>
-                <Text style={{fontSize: 25, textAlign: 'center', fontFamily: Constants.APP_THIN_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.TITLE_CARDS_SCREEN}</Text>
-                <Text style={{marginTop: 20, fontSize: 16, textAlign: "center", fontFamily: Constants.APP_THIN_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.SUBTITLE_CARDS_SCREEN}</Text>
+                <Text style={{fontSize: 25, textAlign: 'center', fontFamily: Constants.APP_THIN_FONT, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.TITLE_CARDS_SCREEN}</Text>
+                <Text style={{marginTop: 20, fontSize: 16, textAlign: "center", fontFamily: Constants.APP_THIN_FONT, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.SUBTITLE_CARDS_SCREEN}</Text>
             </View>
-            <View style={{marginTop: 60}}>
-
-            <SearchableDropdown
+            <View style={{marginTop: 25}}>
+              <SearchableDropdown
                   onItemSelect={item => {
                     this.onSelectCardItem(item);
                   }}
                   containerStyle={{ padding: 15, width: "100%"}}
                   textInputStyle={styles.dropdownTextInput}
                   itemStyle={styles.dropdownItem}
-                  itemTextStyle={{ color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_BODY_FONT}}
-                  itemsContainerStyle={{ maxHeight: 140, borderRadius: 15, borderColor: Constants.BACKGROUND_GREY_COLOR, borderWidth: 2, width:'97%', alignSelf: 'center' }}
+                  itemTextStyle={{ color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: Constants.APP_THIN_FONT}}
+                  itemsContainerStyle={{maxHeight: 180, borderRadius: 10, borderWidth: 0.5, borderColor: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, width:'97%', alignSelf: 'center' }}
                   items={this.state.allCards}
                   placeholder={UIStrings.PLACEHOLDER_ENTER_CARD}
                   placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
@@ -195,20 +197,20 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
                     style: {
                       padding: 12,
                       width: '100%', 
-                      color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
-                      fontFamily: 'Montserrat-Light',
+                      color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
+                      fontFamily: 'Montserrat-Thin',
                       marginTop: 8, 
                       alignSelf: 'center',
-                      backgroundColor: Constants.BACKGROUND_WHITE_COLOR,
-                      borderRadius: 20,
-                      elevation: 10 
+                      borderRadius: 15,
+                      borderColor: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
+                      borderWidth: 0.5
                   }}}
                 />
             </View>
 
-            <View style={{marginTop: 50, paddingHorizontal: 15}}>
+            <View style={{marginTop: 25, paddingHorizontal: 15}}>
               {this.state.showCardsAddedLabel ? 
-               <Text style={{fontSize: 12, fontFamily: Constants.APP_BODY_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{this.getCardsAddedText()}</Text>
+               <Text style={{fontSize: 12, fontFamily: Constants.APP_BODY_FONT, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{this.getCardsAddedText()}</Text>
               : null
               }
               <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 20}} horizontal={true} data={this.state.selectedCards} 
@@ -218,9 +220,8 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
                 )} />
             </View>
 
-            <View style={{marginTop: 40, flexDirection: 'column', justifyContent: 'center'}}>
-               <GradientButton title={UIStrings.TITLE_SUBMIT} onPress={()=>this.onSignUpSubmit()} />
-                <GradientButton title={UIStrings.TITLE_SKIP} onPress={()=>this.onSignUpSubmit()} />
+            <View style={{position: 'absolute', width: '100%', backgroundColor: Constants.BRAND_BACKGROUND_COLOR ,bottom: 0, paddingTop: 8, paddingBottom: 30, alignSelf: 'center'}}>
+                <GradientButton isLight colors={Constants.DEFAULT_GRADIENT} title={this.state.submitButtonLabel} onPress={()=>this.onSignUpSubmit()} />
             </View>
         </View>
         )
@@ -234,12 +235,11 @@ const styles = StyleSheet.create({
         borderColor: Constants.APP_TEXT_COLOR,
         borderRadius: 5,
         width: '100%', 
-        fontFamily: 'Montserrat-Light'
+        fontFamily: Constants.APP_THIN_FONT
     },
     dropdownItem: {
       padding: 12,
-      marginTop: 2,
-      borderBottomWidth: 0.5,
-      borderBottomColor: 'white'
+      borderBottomWidth: 0.2,
+      borderBottomColor: Constants.APP_PLACEHOLDER_TEXT_COLOR,
     },
 })

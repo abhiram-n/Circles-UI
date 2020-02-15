@@ -22,7 +22,9 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 import io.invertase.firebase.database.RNFirebaseDatabasePackage;
+import com.airbnb.android.react.lottie.LottiePackage;
 import io.invertase.firebase.storage.RNFirebaseStoragePackage;
+import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,7 +56,9 @@ public class MainApplication extends Application implements ReactApplication {
             new CirclesWayPackage(),
             new RNFirebaseAuthPackage(),
             new RNFirebaseStoragePackage(),
-            new SMSListenerPackage()
+            new SMSListenerPackage(),
+            new SplashScreenReactPackage(),
+            new LottiePackage()
       );
     }
 

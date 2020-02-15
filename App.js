@@ -56,14 +56,14 @@ class App extends Component<Props> {
       cardInfo: ""
     };
     
-    console.log('Entered app')
+    this.changeNavBarColorToWhite = true;
   }
 
   handleOnNotificationOpened(notificationOpen) {
     // Get information about the notification that was opened
     const notification: Notification = notificationOpen.notification;
-    
     const data = notification.data;
+
     if (data == null || data.type == null) {
       alert("Sorry, there was an error opening the notification.");
       return;
@@ -106,17 +106,25 @@ class App extends Component<Props> {
 
       NavigationHelpers.clearStackAndNavigateWithParams("FriendRequestInfo", this.props.navigation, params)
     }
+    else if (data.type == Constants.POST_NOTIFICATION_TYPE){
+      let params = {
+        postId: data.id, 
+        isUserSender: false
+      }
+
+      NavigationHelpers.clearStackAndNavigateWithParams("PostInfo", this.props.navigation, params)
+    }
   }
 
   componentDidMount() {
+    SplashScreen.hide();
     this.init();
-    changeNavigationBarColor(Constants.HEADING_COLOR);
+    changeNavigationBarColor(Constants.BRAND_BACKGROUND_COLOR);
   }
 
   async init() {
     firebase.analytics().setAnalyticsCollectionEnabled(true);
     const notificationOpen: NotificationOpen = await firebase.notifications().getInitialNotification();
-    console.log('After getting notification')
     
     if (notificationOpen) {
       this.handleOnNotificationOpened(notificationOpen);
@@ -142,6 +150,7 @@ class App extends Component<Props> {
           .android.setChannelId(ANDROID_CHANNEL_ID)
           .android.setGroupAlertBehaviour(firebase.notifications.Android.GroupAlert.All)
           .android.setLights(0xFF00FF00, 200, 200)
+          .android.setLargeIcon(Constants.LOGO_URL)
           .android.setPriority(firebase.notifications.Android.Priority.Max)
           .android.setVibrate(ANDROID_VIBRATION_PATTERN)
           .android.setVisibility(firebase.notifications.Android.Visibility.Public)
@@ -149,13 +158,12 @@ class App extends Component<Props> {
           .android.setDefaults(firebase.notifications.Android.Defaults.All);
           
           localNotification.android.setSmallIcon('ic_stat_name')
-          localNotification.android.setColor("#113c55")
+          localNotification.android.setColor("#AF2BED")
         firebase
           .notifications()
           .displayNotification(localNotification)
           .catch(err => console.error(err)); 
       });
-      console.log('Stage 2')
 
     // When notification is opened, handle the actions.
     this.notificationOpenedListener = firebase
@@ -164,40 +172,38 @@ class App extends Component<Props> {
         this.handleOnNotificationOpened(notificationOpen);
       });
       
-      console.log('Stage 3')
-
     if (!notificationOpen) {
         AuthHelpers.getToken()
         .then(value => {
           if (value != null) {
             NavigationHelpers.clearStackAndNavigate("UserHome", this.props.navigation);
           } else {
+            this.changeNavBarColorToWhite = false;
             NavigationHelpers.clearStackAndNavigate("Welcome", this.props.navigation);
           }
         })
         .catch(reason => {
+          this.changeNavBarColorToWhite = false;
           NavigationHelpers.clearStackAndNavigate("Welcome", this.props.navigation);
         });
     }
   }
 
   componentWillUnmount() {
-    changeNavigationBarColor(Constants.BACKGROUND_WHITE_COLOR);
+    if (this.changeNavBarColorToWhite){
+      changeNavigationBarColor(Constants.BACKGROUND_WHITE_COLOR);
+    }
+    
     this.notificationOpenedListener;
     this.notificationListener;
   }
 
   render() {
     return (
-      <LinearGradient
-        colors={Constants.APP_THEME_COLORS}
-        style={{ width: "100%", height: "100%" }}
-      >
         <View style={styles.container}>
-          <StatusBar backgroundColor={Constants.HEADING_COLOR} translucent />
-          <Text style={styles.welcome}>One moment...</Text>
+          <StatusBar translucent backgroundColor={Constants.BRAND_BACKGROUND_COLOR} />
+          <Text style={styles.welcome}>{UIStrings.ONE_MOMENT_DOTS}</Text>
         </View>
-      </LinearGradient>
     );
   }
 }
@@ -241,13 +247,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Constants.APP_BKGD_COLOR
+    backgroundColor: Constants.BRAND_BACKGROUND_COLOR
   },
   welcome: {
     textAlign: "center",
     color: Constants.APP_TEXT_COLOR,
     fontSize: 36,
-    fontFamily: "Montserrat-Bold"
+    fontFamily: "Montserrat-Thin"
   },
   accountAccess: {
     position: "absolute",

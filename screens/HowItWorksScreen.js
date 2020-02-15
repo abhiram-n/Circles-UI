@@ -14,30 +14,29 @@ export default class HowItWorksScreen extends Component<Props>{
         this.slides=[
             {
                 key: 'first',
-                backgroundColor: Constants.APP_HOW_IT_WORKS_COLOR, 
+                backgroundColor: Constants.BACKGROUND_WHITE_COLOR, 
+                text: "A Circle is a private space for 10 of your close friends and family with whom you're comfortable enough to share your credit and debit cards.",
+                title: "Your Circle",
                 imageStyle: styles.image,                
                 textStyle: styles.text,
                 titleStyle: styles.title,
             },
             {
                 key: 'second',
-                backgroundColor: Constants.APP_HOW_IT_WORKS_COLOR,
+                backgroundColor: Constants.BACKGROUND_WHITE_COLOR,
+                text: "Figure out who has the card you're looking for either in your Circle or in your friends' Circles.",
+                title: "Discover Cards",
                 imageStyle: styles.image,                
                 textStyle: styles.text,
                 titleStyle: styles.title,
             },
             {
                 key: 'third',
-                backgroundColor: Constants.APP_HOW_IT_WORKS_COLOR,
-                imageStyle: styles.flowImage,
-                titleStyle: styles.title
-            },
-            {
-                key: 'fourth',
-                backgroundColor: Constants.APP_HOW_IT_WORKS_COLOR,
-                //image: require("../assets/logo/high-five.png"),
-                textStyle: styles.text,
+                backgroundColor: Constants.BACKGROUND_WHITE_COLOR,
+                text: "Request friends in your Circle or acquaintances in your friends' Circles to share card details in an end-to-end encrypted chat.",
+                title: "Request and Share",
                 imageStyle: styles.image,
+                textStyle: styles.text,
                 titleStyle: styles.title
             },
         ]
@@ -46,15 +45,13 @@ export default class HowItWorksScreen extends Component<Props>{
     componentWillMount(){
         firebase.analytics().setCurrentScreen("HowItWorks");
         changeNavigationBarColor(Constants.APP_HOW_IT_WORKS_COLOR, false);
-        StatusBar.setBackgroundColor(Constants.APP_HOW_IT_WORKS_COLOR);
     }
 
     componentWillUnmount(){
-        changeNavigationBarColor(Constants.APP_NATIVE_NAV_BAR_COLOR, false)
+        changeNavigationBarColor(Constants.BRAND_BACKGROUND_COLOR, false)
     }
 
     _onDone = () => {
-        changeNavigationBarColor(Constants.APP_NATIVE_NAV_BAR_COLOR, false)
         if (this.nextScreen == Constants.NONE)
         {
             this.props.navigation.goBack();
@@ -74,15 +71,15 @@ export default class HowItWorksScreen extends Component<Props>{
 
 const styles = StyleSheet.create({
     text:{
-        fontFamily: 'Montserrat-Light',
+        fontFamily: Constants.APP_THIN_FONT,
         fontSize: 14,
         textAlign: 'center',
-        color: Constants.APP_TEXT_COLOR
+        color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
     },
     title: {
-        fontFamily: 'Montserrat-Regular',
+        fontFamily: Constants.APP_THIN_FONT,
         textAlign: 'center',
-        color: Constants.APP_TEXT_COLOR
+        color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
     },
     image:{
         width: "70%",

@@ -22,7 +22,7 @@ const CommonStyles =  StyleSheet.create({
       },
       popup: {
         backgroundColor: Constants.BACKGROUND_WHITE_COLOR,
-        padding: 25,
+        padding: 20,
         borderTopRightRadius: 40,
         borderBottomLeftRadius: 40,
         borderRadius: 5,
@@ -48,12 +48,13 @@ const CommonStyles =  StyleSheet.create({
         textAlignVertical: 'center',
       },
       popupTitle:{
+        marginTop: 10,
         fontFamily: Constants.APP_SUBTITLE_FONT, 
-        fontSize: 18,
+        fontSize: 16,
         textAlign: 'center',
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
         textAlignVertical: 'center',
-        marginBottom: 30
+        marginBottom: 20
       },
       popupSubtitle:{
         fontFamily: Constants.APP_BODY_FONT, 
@@ -62,7 +63,7 @@ const CommonStyles =  StyleSheet.create({
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
         textAlignVertical: 'center',
         marginTop: 8,
-        marginBottom: 20
+        marginBottom: 15
       }
 });
 

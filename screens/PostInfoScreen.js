@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
+import {Platform, StyleSheet, Text, View, Image, TouchableOpacity, ScrollView} from 'react-native';
 import { ActivityIndicator, Picker, TextInput, StatusBar } from 'react-native';
 import {Button, Fab, Icon} from 'native-base';
 import {createStackNavigator, createAppContainer} from 'react-navigation';
@@ -16,8 +16,8 @@ import TopLeftButton from '../components/TopLeftButton';
 import RoundImageWithCaptionButton from '../components/RoundImageWithCaptionButton';
 import CreditCardWithText from '../components/CreditCardWithText';
 import IconWithCaptionButton from '../components/IconWithCaptionButton';
-import CirclePopup from '../components/CirclePopup';
 import RowWithTextLeftAndRight from '../components/RowWithTextLeftAndRight';
+import LottieView from 'lottie-react-native';
 
 const GET_POST_API = "/posts?id=";
 export default class PostInfoScreen extends Component<Props>{
@@ -26,7 +26,6 @@ export default class PostInfoScreen extends Component<Props>{
     {
         super(props);
         this.state = {
-            showCirclePopup: false,
             loading: true,
             creatorName: null,
             creatorId: null, 
@@ -48,10 +47,6 @@ export default class PostInfoScreen extends Component<Props>{
 
     componentWillUnmount(){
         this._isMounted = false;
-    }
-
-    onCirclePress(){
-        this.setState((prevState)=> ({showCirclePopup: !prevState.showCirclePopup}));
     }
 
     async getPostDetails(){
@@ -105,13 +100,19 @@ export default class PostInfoScreen extends Component<Props>{
     {
         return (
         <View style={styles.container}>
-            <StatusBar translucent backgroundColor='transparent' />
+            <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
             {/* The title */}
             <View style={{height: "7%", flexDirection: 'row', justifyContent: 'center', alignContent: 'center', backgroundColor: Constants.BACKGROUND_WHITE_COLOR}}>
-                <Text style={{fontFamily: Constants.APP_TITLE_FONT, fontSize: 18, textAlignVertical:'center', textAlign: 'center', color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.REQUEST_ADD_TO_CIRCLE}</Text>
+                <Text style={{fontFamily: Constants.APP_TITLE_FONT, fontSize: 18, textAlignVertical:'center', textAlign: 'center', color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.BROADCAST}</Text>
             </View>
 
-            { this.state.loading ? <ActivityIndicator size="large" color={Constants.APP_LOADING_COLOR} /> : null }
+            { 
+                this.state.loading ? 
+                <LottieView style={{alignSelf: 'center', width: '70%', height: 100, marginVertical: 20, marginHorizontal: 10}} 
+                source={require("../assets/resources/loading.json")} autoPlay loop />
+                : 
+                null 
+            }
            
             {/* Request details */}
             <View style={{flex:1, height: "93%", borderTopLeftRadius: 40, borderTopRightRadius: 40, width: '100%', backgroundColor: Constants.BACKGROUND_GREY_COLOR}}>
@@ -119,31 +120,25 @@ export default class PostInfoScreen extends Component<Props>{
                     <RoundImageWithCaptionButton isLarge={true}  imgUri={this.state.creatorImgUrl} />
                 </View>
 
-                <View style={{overflow: 'hidden', padding: 5, backgroundColor: Constants.BACKGROUND_WHITE_COLOR, marginVertical: 20, elevation: 2, borderRadius: 20, justifyContent: 'center', alignSelf: 'center', width: '90%', height: 160, flexDirection: 'column'}}>
-                    <Text numberOfLines={1} style={{textAlign: 'center', paddingHorizontal: 10, paddingVertical: 5, fontFamily: Constants.APP_BODY_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontSize: 11}}>{this.state.creatorName} says:</Text>
+                <ScrollView contentContainerStyle={{justifyContent: 'center',}} style={{borderColor: Constants.APP_THEME_COLORS[1],borderWidth: 1, padding: 5, backgroundColor: Constants.BACKGROUND_WHITE_COLOR, marginVertical: 20, elevation: 2, borderRadius: 20, alignSelf: 'center', width: '90%', maxHeight: 160, flexDirection: 'column'}}>
+                    <Text numberOfLines={1} style={{textAlign: 'center', paddingHorizontal: 10, paddingVertical: 5, fontFamily: Constants.APP_BODY_FONT, color: Constants.APP_THEME_COLORS[1], fontSize: 11}}>{this.state.creatorName} says:</Text>
                     <Text style={{textAlign: 'center', padding: 10, fontFamily: Constants.APP_BODY_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontSize: 14}}>{this.state.text}</Text>
-                </View>
+                </ScrollView>
                 
                 <View style={{alignSelf: 'center', alignContent: 'center'}}>
-                    <RowWithTextLeftAndRight leftText={UIStrings.NAME_COLON} rightText={this.state.creatorName} />
-                    <RowWithTextLeftAndRight leftText={UIStrings.DATE_COLON} rightText={this.state.createdOn} />
+                    <RowWithTextLeftAndRight backgroundColor={Constants.BACKGROUND_WHITE_COLOR} leftText={UIStrings.NAME_COLON} rightText={this.state.creatorName} />
+                    <RowWithTextLeftAndRight backgroundColor={Constants.BACKGROUND_WHITE_COLOR} leftText={UIStrings.DATE_COLON} rightText={this.state.createdOn} />
                 </View>
 
-            {/* Circle options */}
-            { <CirclePopup  onClose={()=>this.onCirclePress()} isVisible={this.state.showCirclePopup} navigate={this.props.navigation.navigate} />  }
             </View>
 
             {/* Bottom menu */}
             <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 100, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: 60, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="FontAwesome5" caption={UIStrings.HOME} onPress={()=>NavigationHelpers.clearStackAndNavigate('UserHome', this.props.navigation)}/>
-                <IconWithCaptionButton icon="user" iconType="FontAwesome5" caption={UIStrings.PROFILE} onPress={()=>{this.props.navigation.navigate('Profile')}} />
-                <TouchableOpacity onPress={()=>this.onCirclePress()} style={{alignContent: 'center', justifyContent: 'center'}}>
-                  <View style={{flexDirection: "column", justifyContent: 'center', marginHorizontal: 5, alignContent: 'center'}}>
-                    <Image source={require('../assets/logo/logo_tp.png')} style={{width: 34, height: 34, borderRadius: 17, alignSelf: 'center'}} />
-                  </View>
-                </TouchableOpacity>
-                <IconWithCaptionButton icon="paper-plane" iconType="FontAwesome5" caption={UIStrings.TITLE_CONTACT_US} onPress={()=>{this.props.navigation.navigate('ContactUs')}}/>
-                <IconWithCaptionButton icon="log-out" iconType="Ionicons" caption={UIStrings.SIGN_OUT} onPress={()=>NavigationHelpers.logout(this.props.navigation) } />
+                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
+                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
             </View>
         </View>
         );

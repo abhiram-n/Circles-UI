@@ -47,9 +47,22 @@ export function goToDialScreen(phoneNumber){
   Linking.openURL(phoneNumberString);
 }
 
+export function getCardTemplateForCard(itemId){
+  if (itemId == null){
+    return Constants.CARD_TEMPLATE_NAMES[0]
+  }
+
+  numTemplates = Constants.CARD_TEMPLATE_NAMES.length;
+  templateIndex = itemId % numTemplates;
+  return Constants.RESOURCE_PATH_PREFIX + Constants.CARD_TEMPLATE_NAMES[templateIndex];
+}
+
 export function getColorForCard(itemId){
+  if (itemId == null){
+    return Constants.DEFAULT_GRADIENT;
+  }
+
   numColors = Constants.CARDS_COLORS.length;
   colorId = itemId % numColors;
-  console.debug('ColorID: '  + colorId + ' num: ' + numColors + ' id: ' + itemId)
   return Constants.CARDS_COLORS[colorId];
 }

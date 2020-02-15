@@ -35,6 +35,7 @@ import { GiftedChat, Bubble, Message, SystemMessage } from "react-native-gifted-
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import { EThree } from "@virgilsecurity/e3kit-native";
 import { StatusBar } from "react-native";
+import LottieView from 'lottie-react-native';
 
 export default class ChatScreen extends Component{
   constructor(props:Props) {
@@ -44,7 +45,7 @@ export default class ChatScreen extends Component{
         {
           _id: 1,
           text:
-            "All messages are end-to-end encrypted.",
+            "You can share details here. All messages are end-to-end encrypted.",
           createdAt: new Date(),
           system: true
         }
@@ -69,6 +70,7 @@ export default class ChatScreen extends Component{
     const chatKeyPrefix:string = `c_`;
     this.chatKey = chatKeyPrefix + this.requestId;
     this.chatExists = false;
+    this.messagesReference = null
   }
 
   setChatInfo() {
@@ -162,6 +164,7 @@ export default class ChatScreen extends Component{
   //     })
   // }
 
+
   listenForMessages() {
     firebase.database().ref("messages/" + this.chatKey + "/").on("child_added", async (snapshot) =>  {
         let newMessage = {
@@ -175,8 +178,13 @@ export default class ChatScreen extends Component{
           image: snapshot.val().image
         };
 
+        newMessages = [...this.state.messages, newMessage];
+        if (this.state.messages.length > 2){
+          newMessages.sort((a, b)=> { return new Date(b.createdAt) - new Date(a.createdAt)})
+        }
+
         this.setState(prevState => ({
-          messages: GiftedChat.append(prevState.messages, [newMessage])
+          messages: GiftedChat.append(newMessages, [])
         }));
       });
 
@@ -187,7 +195,7 @@ export default class ChatScreen extends Component{
     firebase.database().goOnline();
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     firebase.analytics().setCurrentScreen("Chat");
     AuthHelpers.getTokenIdPhone().then((result)=>{
       this.myFCMToken = result[0][1];
@@ -224,12 +232,6 @@ export default class ChatScreen extends Component{
   }
 
   async sendNotification() {
-    // let headers = new Headers();
-    // headers.append(
-    //   "Authorization",
-    //   "key=" + Constants.FIREBASE_MESSAGING_KEY
-    // );
-    console.log('Sending notification');
     fetch(Constants.SERVER_ENDPOINT + "/user/sendChatNotification", {
       method: Constants.POST_METHOD,
       headers: await AuthHelpers.getRequestHeaders(),
@@ -258,9 +260,7 @@ export default class ChatScreen extends Component{
       this.partnerPublicKey = await this.virgilUser.findUsers(partnerIds);
     }
 
-    console.log('Encryption: Start')
     encrypted = await this.virgilUser.encrypt(text, this.partnerPublicKey);
-    console.log('Encryption: End')
     return encrypted;
   }
 
@@ -269,18 +269,15 @@ export default class ChatScreen extends Component{
       return;
     }
 
-    if (sentBy == this.myPhoneNumber){
-      return this.virgilUser.decrypt(text);
-    }
+      if (sentBy == this.myPhoneNumber){
+        return await this.virgilUser.decrypt(text).catch((err)=>{ return "Message Expired"})
+      }
 
-    if (this.partnerPublicKey == null){
-      this.partnerPublicKey = await this.virgilUser.findUsers(identity=this.partnerId.toString());
-    }
+      if (this.partnerPublicKey == null){
+        this.partnerPublicKey = await this.virgilUser.findUsers(identity=this.partnerId.toString()).catch((err)=>{ return "Message Expired"})
+      }
 
-    console.log('Decryption: Start')
-    decrypted = await this.virgilUser.decrypt(text, this.partnerPublicKey);
-    console.log('Decryption: End')
-    return decrypted;
+      return await this.virgilUser.decrypt(text, this.partnerPublicKey).catch((err)=>{ return "Message Expired"})
   }
 
   async send(messages:Object) {
@@ -291,11 +288,12 @@ export default class ChatScreen extends Component{
       return;
     }
 
-    // todo : if null, assign
-    console.log('Coming here1')
-    var messagesReference = firebase.database().ref("messages/" + this.chatKey);
+    if (this.messagesReference == null){
+      this.messagesReference = firebase.database().ref("messages/" + this.chatKey);
+    }
+
     for (let i = 0; i < messages.length; i++) {
-      messagesReference.push({
+      this.messagesReference.push({
           text: await this.encryptMessage(messages[i].text),
           sent_by: this.myPhoneNumber,
           created: new Date(),
@@ -306,7 +304,6 @@ export default class ChatScreen extends Component{
         });
     }
 
-    console.log('COming here2');
     this.sendNotification();
   }
 
@@ -330,14 +327,34 @@ export default class ChatScreen extends Component{
     );
   }
 
+  renderBubble(props){
+    return(
+      <Bubble {...props}
+        textStyle={{
+          right:{
+            color:'#FFFFFF'
+          }
+        }}
+        wrapperStyle={{
+          left:{
+            backgroundColor: '#FFFFFF'
+          },
+          right:{
+            backgroundColor: Constants.SUCCESS_COLOR
+          }
+        }}
+       />
+    )
+  }
+
   render() {
     return (
     <View style={{width: '100%', height: '100%'}}>
-      <StatusBar translucent backgroundColor={Constants.BUTTON_COLORS[0]} />
+      <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
       <TopLeftButton color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} iconName="home" onPress={()=>this.props.navigation.navigate('UserHome')} />
       <View style={{ flexDirection: 'column', position: "absolute", top: 0, height: "28%", width: "100%"}}>
         <LinearGradient colors={Constants.BUTTON_COLORS} style={{justifyContent: "center", flexDirection: 'column', width: '100%', height: '100%'}}>
-          <Image source={{uri: this.partnerImgUrl}} style={{width: 50, height: 50, borderRadius: 25, alignSelf: 'center'}}  resizeMethod="resize"/>
+          <Image defaultSource={require('../assets/resources/default_user.png')} source={{uri: this.partnerImgUrl}} style={{backgroundColor: Constants.IMAGE_DEFAULT_BKGD_COLOR,width: 50, height: 50, borderRadius: 25, alignSelf: 'center'}}  resizeMethod="resize"/>
           {
             this.state.loading ? 
               <Text numberOfLines={1} style={{marginBottom: 15, fontFamily: Constants.APP_BODY_FONT, fontSize: 16, color: Constants.APP_LOADING_COLOR, textAlign: 'center', paddingVertical: 10, paddingHorizontal: 5}}>{UIStrings.SETTING_UP_YOUR_CHAT}</Text>
@@ -347,8 +364,14 @@ export default class ChatScreen extends Component{
         </LinearGradient>
       </View>
       <View style={{overflow:"hidden" ,position: "absolute", borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderRadius: 50, bottom: 0, height: "80%", width: "100%", backgroundColor: Constants.BACKGROUND_WHITE_COLOR}}>
-        <ImageBackground source={require("../assets/logo/chat_bg.png")} style={{  paddingTop: 10, width: '100%', height: '100%'}}>
-        {this.state.loading ? <ActivityIndicator color={Constants.APP_LOADING_COLOR} size="large" /> : null }
+        <ImageBackground source={require("../assets/resources/chat_bg.png")} style={{  paddingTop: 10, width: '100%', height: '100%'}}>
+        {
+          this.state.loading ? 
+          <LottieView style={{alignSelf: 'center', width: '70%', height: 80, marginVertical: 5, marginHorizontal: 10}} 
+              source={require("../assets/resources/loading.json")} autoPlay loop />
+          : 
+          null 
+        }
         <GiftedChat
           isLoadingEarlier={true}
           messages={this.state.messages}
@@ -359,6 +382,7 @@ export default class ChatScreen extends Component{
           onInputTextChanged={(text) => this.onTypedTextChange(text)}
           onSend={messages => { this.send(messages); }}
           user={{ _id: this.myPhoneNumber, avatar: null  }}
+          renderBubble={this.renderBubble}
         />
         </ImageBackground>
         </View>

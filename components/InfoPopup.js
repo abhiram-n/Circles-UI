@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Modal, Button } from 'react-native';
+import { StyleSheet, View, Text, Modal, Button, ScrollView, Image } from 'react-native';
 import * as Constants from '../helpers/Constants';
 import CommonStyles from './CommonStyles';
 import * as UIStrings from '../helpers/UIStrings';
@@ -7,17 +7,38 @@ import TopRightButton from './TopRightButton';
 import { Icon, Input } from "native-base";
 import { TouchableOpacity } from "react-native";
 import GradientButton from "./GradientButton";
+import LottieView from "lottie-react-native"
 
-const InfoPopup = ({isVisible, onClose, title, content}) => (
+const InfoPopup = ({isVisible, onClose, title, content, buttonParams, lottieProps, makeExteriorTransparent}) => (
   <Modal visible={isVisible} transparent={true} onRequestClose={onClose}>
-  <View style={CommonStyles.popupContainer}>
+  <View style={[CommonStyles.popupContainer, makeExteriorTransparent ? styles.exteriorTransparent : null]}>
     <View style={[CommonStyles.popup, {padding: 15}]}>
-      <TopRightButton color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} iconName="times" onPress={onClose} height={50}/>
-      <Text style={CommonStyles.popupTitle}>{title}</Text>
-      <View style={styles.textContainer}>
+      <TopRightButton color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} iconName="times" onPress={onClose} height={40}/>
+      {/* {iconName != null ? 
+        <Icon name={iconName} type="FontAwesome5" style={{margin: 10, alignSelf: 'center', fontSize: 100, color: Constants.APP_THEME_COLORS[0]}}/>
+        : 
+        null
+      }
+      {imageName != null ? 
+        <Image resizeMethod="resize" resizeMode="contain" source={imageName} style={{alignSelf: 'center', width: 130, height: 130, marginVertical: 20, marginHorizontal: 10}} />
+        :
+        null
+      } */}
+      {lottieProps != null ?
+        <LottieView speed={lottieProps.speed ?? 1} style={{alignSelf: 'center', width: '70%', height: 100, marginVertical: 5, marginHorizontal: 10}} source={lottieProps.name} autoPlay loop />
+        : 
+        null
+      }
+      {title != null ? 
+        <Text style={CommonStyles.popupTitle}>{title}</Text>
+        : 
+        null
+      }
+      <ScrollView style={styles.textContainer}>
         <Text style={styles.text}>{content}</Text>
-      </View>
-      <GradientButton isLarge={false} title={UIStrings.OK} onPress={onClose} />
+      </ScrollView>
+      <GradientButton isLarge={false} title={buttonParams != null ? buttonParams.title : UIStrings.OK} 
+                      onPress={buttonParams != null ? buttonParams.onPress : onClose} />
     </View>
     </View>
   </Modal>
@@ -39,21 +60,23 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30, 
     height: 210,
   },
+  exteriorTransparent: {
+    backgroundColor: 'transparent'
+  },
   textContainer:{
-    marginTop: 13, 
-    marginBottom: 30, 
+    marginTop: 5, 
+    marginBottom: 25, 
     alignSelf: 'center', 
-    justifyContent: 'center', 
     alignContent: 'center', 
     width: '100%', 
-    height: 100
+    minHeight: 30,
+    maxHeight: 120
   },
   text:{
     fontFamily: Constants.APP_BODY_FONT, 
-    fontSize: 14, 
+    fontSize: 13, 
     color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, 
-    textAlign: 'center', 
-    paddingHorizontal: 8
+    textAlign: 'left', 
   },
   icon:{
     width: 40, 

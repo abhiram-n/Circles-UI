@@ -33,7 +33,7 @@ export default class WaitScreen extends Component<Props>{
         return (
         <LinearGradient colors={Constants.APP_THEME_COLORS} style={{width: '100%', height: '100%'}} >
         <View style={styles.container}>
-            <StatusBar backgroundColor={Constants.APP_THEME_COLORS[0]}/>
+            <StatusBar translucent backgroundColor={Constants.APP_THEME_COLORS[0]}/>
             <Text style={styles.title}>{this.title}</Text>
             <Text style={styles.body}>{this.body}</Text>
             <GradientButton text={"HOME"} onPress={()=>NavigationHelpers.clearStackAndNavigate('UserHome', this.props.navigation)}/>

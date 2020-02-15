@@ -1,5 +1,6 @@
 export const APP_GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.plankton.circles"
 export const APP_GET_CIRCLES_IN_URL = "getcircles.in"
+export const LOGO_URL = "https://firebasestorage.googleapis.com/v0/b/circles-way.appspot.com/o/photos%2Flogo%2FCircles_Logo_SM_dark.png?alt=media&token=adf06bed-8326-411a-9c9e-ce338742860e"
 
 // Request parameter constants
 export const PARAM_UPI = "upiID"
@@ -24,7 +25,9 @@ export const STORAGE_ENCRYPTION_ENABLED = "e2e"
 export const DIAL_SCREEN_LINK_TEMPLATE = "tel:${%}"
 export const SERVER_ENDPOINT =  "https://api.circlesway.com"  
 // export const SERVER_ENDPOINT = "http://192.168.0.4:5000" 
-export const DELAY_BEFORE_MANUAL_OTP = 10000 // milliseconds
+export const DELAY_BEFORE_MANUAL_OTP = 9000 // milliseconds
+export const LANDING_PAGE_BUTTON_DELAY = 3000
+export const NOTIFICATION_POPUP_DELAY = 3000
 
 // Auth
 export const AUTH_HEADER = "Authorization"
@@ -57,6 +60,7 @@ export const VERIFICATION_CODE_LENGTH = 5
 export const AUTO_VERIFICATION_TIMEOUT = 10 // seconds
 export const INVITE_CODE_MAX_LENGTH = 6
 export const INVITE_CODE_MIN_LENGTH = 4
+export const SHORT_DESCRIPTION_MAX_LENGTH = 50
 
 export const FIREBASE_STORAGE_REF = "/uploads/users/profilePictures/"
 export const APP_TITLE_SIZE = 30
@@ -75,14 +79,14 @@ export const APP_FLOAT_BUTTON_COLOR = '#41c572'////"#8dd7c3",//green
 export const APP_PLACEHOLDER_TEXT_COLOR =  "#CECCCC"
 export const APP_NATIVE_NAV_BAR_COLOR = '#2b32b2'
 export const APP_HOME_SCREEN_BUTTON_TEXT_COLOR = '#1488cc'
-export const APP_HOW_IT_WORKS_COLOR = '#1488cc'
+export const APP_HOW_IT_WORKS_COLOR = '#ffffff'
 export const APP_LOADING_COLOR = '#F4B71A'
 export const APP_SUCCESS_COLOR = "#00C497"
 export const LIGHT_ICON_COLOR = "#ffffff"
 export const TEXT_COLOR_FOR_DARK_BACKGROUND = "#ffffff"
 export const TEXT_COLOR_FOR_LIGHT_BACKGROUND = "#000000"
 export const SUBTEXT_COLOR_FOR_LIGHT_BACKGROUND = "#8f8f8f"
-export const HEADING_COLOR = "#001689"
+export const BRAND_BACKGROUND_COLOR = "#001689"
 export const BLUE_COLOR = "#0000bd"
 export const BACKGROUND_WHITE_COLOR = "#ffffff"
 export const BACKGROUND_GREY_COLOR = "#f2f2f2"
@@ -91,6 +95,8 @@ export const ADD_TO_CIRCLE_ICON_COLOR = "#004CFF"
 export const BROADCAST_ICON_COLOR = "#FDCB3c"
 export const ACCESS_REQUEST_ICON_COLOR = "#d22d16"
 export const CONNECTIONS_ICON_COLOR = "#3fa6dd"
+export const IMAGE_DEFAULT_BKGD_COLOR = "#f3f3f3"
+export const ERROR_TEXT_COLOR = "#ff506b"
 export const CARDS_COLORS = [
     ["#EE0979", "#FF6a00"],
     ['#0000B0', '#AF2BED'],
@@ -101,6 +107,10 @@ export const CARDS_COLORS = [
     ['#000428', '#004e92'],
     ['#061161', '#780206'],
 ]
+
+export const RESOURCE_PATH_PREFIX = '../assets/resources/'
+export const CARD_TEMPLATE_NAMES = ['new_card.png']
+export const DEFAULT_GRADIENT = ["#ffffff", "#ffffff"]
 
 // Colors for the Floating Button
 export const SIGN_OUT_COLOR = '#F44336'
@@ -144,6 +154,8 @@ export const LARGE_BANNER_HEIGHT = "50%"
 export const SMALL_ARCH_SCREEN_HEIGHT = "60%"
 export const LARGE_ARCH_SCREEN_HEIGHT = "72%"
 export const BOTTOM_MENU_HEIGHT = 60
+export const EXTRA_SMALL_BANNER_HEIGHT = "30%"
+export const EXTRA_LARGE_ARCH_SCREEN_HEIGHT = "80%"
 
 // Friend requests
 export const FRIEND_REQUEST_ACTIVE = 0
@@ -176,3 +188,10 @@ export const ACCESS_REQUEST_INVALIDATED_CODE = 5
 
 // Encryption
 export const IDENTITY_ALREADY_EXISTS_ERROR = "IdentityAlreadyExistsError"
+
+// Icons
+export const CARD_REQUEST_ICON_NAME = "unlock"
+export const CARD_REQUEST_ICON_TYPE = "FontAwesome"
+
+// Posts
+export const POST_NOTIFICATION_TYPE = "post"

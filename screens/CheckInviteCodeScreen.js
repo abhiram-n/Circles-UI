@@ -31,7 +31,7 @@ export default class CheckInviteCodeScreen extends Component<Props> {
 
   componentDidMount() {
     this._isMounted = true;
-    changeNavigationBarColor(Constants.BACKGROUND_WHITE_COLOR);
+    // changeNavigationBarColor(Constants.BACKGROUND_WHITE_COLOR);
   }
 
   componentWillUnmount(){
@@ -41,6 +41,11 @@ export default class CheckInviteCodeScreen extends Component<Props> {
   onNextPress(){
     if (this.state.inviteCode == null || this.state.inviteCode.length < Constants.INVITE_CODE_MIN_LENGTH){
       Utilities.showLongToast(UIStrings.ENTER_VALID_CODE);
+      return;
+    }
+
+    if (this.state.disableInviteCode){
+      Utilities.showLongToast(UIStrings.OPERATION_IN_PROGRESS);
       return;
     }
 
@@ -84,22 +89,22 @@ export default class CheckInviteCodeScreen extends Component<Props> {
   
   render() {
     return (
-      <View style={{flexDirection: 'column', height: "100%", width: '100%'}}>
-      <StatusBar translucent backgroundColor='transparent' />
-      <TopLeftButton iconName={Constants.ICON_BACK_BUTTON} onPress={()=>this.props.navigation.goBack()} color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} />
+      <View style={{flexDirection: 'column', height: "100%", width: '100%', backgroundColor: Constants.BRAND_BACKGROUND_COLOR}}>
+      <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
+      <TopLeftButton iconName={Constants.ICON_BACK_BUTTON} onPress={()=>this.props.navigation.goBack()} color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} />
       <View style={{flexDirection: 'column', alignSelf: 'center', justifyContent: 'center', flex: 1, padding: 20, width: '90%'}}>
          <Text style={styles.title}>{UIStrings.ENTER_INVITE_CODE}</Text>
          <Text style={styles.subTitle}>{UIStrings.APP_INVITE_ONLY}</Text>
           
           {/* Input for invite code */}
           <View style={{flexDirection:'row', margin: 10, justifyContent: 'center'}}>
-            <InputGroup style={{width: '75%'}} error={this.state.inviteCode == null || this.state.inviteCode.length < Constants.INVITE_CODE_MIN_LENGTH}>
+            <InputGroup style={{width: '75%'}} disabled>
               <Input
                autoCapitalize="characters"
                editable={!this.state.disableInviteCode}
                onChangeText={text=>this.setState({inviteCode: text})}
                maxLength={Constants.INVITE_CODE_MAX_LENGTH}
-               style={{fontSize: 30, textAlign: 'center', color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_BODY_FONT }} />
+               style={{fontSize: 30, textAlign: 'center', color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: Constants.APP_BODY_FONT }} />
             </InputGroup>
           </View>
 
@@ -108,7 +113,7 @@ export default class CheckInviteCodeScreen extends Component<Props> {
           
           {/* Bottom buttons */}
           <View style={{marginTop: 30, flexDirection: 'row', justifyContent: 'center', alignSelf: 'center'}}>
-              <GradientButton isLarge={true} title={this.state.disableInviteCode ? UIStrings.TITLE_VERIFYING : UIStrings.TITLE_VERIFY} onPress={()=>this.onNextPress()}/>
+              <GradientButton isLarge isLight colors={Constants.DEFAULT_GRADIENT} title={this.state.disableInviteCode ? UIStrings.TITLE_VERIFYING : UIStrings.TITLE_VERIFY} onPress={()=>this.onNextPress()}/>
           </View> 
        </View>
       </View>
@@ -124,7 +129,7 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   title:{
-    color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
+    color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
     fontFamily: Constants.APP_THIN_FONT,
     fontSize: 45,
     textAlign: 'center'
@@ -136,7 +141,7 @@ const styles = StyleSheet.create({
     fontFamily: "Montserrat-Bold"
   },
   subTitle: {
-    color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
+    color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
     fontFamily: Constants.APP_THIN_FONT,
     fontSize: 14,
     textAlign: "center",
@@ -151,7 +156,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
     fontFamily: Constants.APP_BODY_FONT,
-    color: Constants.SUCCESS_COLOR,
-    fontSize: 14
+    color: Constants.ERROR_TEXT_COLOR,
+    fontSize: 13
   }
 });

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {ActivityIndicator, ToastAndroid, StyleSheet, Text, View, ScrollView} from 'react-native';
+import {ActivityIndicator, ToastAndroid, StyleSheet, Text, View, ScrollView, TextInput} from 'react-native';
 import { FlatList, Image, TouchableOpacity, StatusBar, ImageBackground, Modal} from 'react-native';
 import * as Constants from '../helpers/Constants';
 import * as UIStrings from '../helpers/UIStrings';
@@ -13,9 +13,9 @@ import firebase from 'react-native-firebase';
 import IconWithCaptionButton from '../components/IconWithCaptionButton'
 import CreditCardWithText from '../components/CreditCardWithText'
 import TopRightButton from '../components/TopRightButton';
-import CirclePopup from '../components/CirclePopup';
 import CreditCardWithButton from '../components/CreditCardWithButtons';
 import GradientButton from '../components/GradientButton';
+import LottieView from 'lottie-react-native';
 
 const PROFILE_API = "/user/profile"
 const ID_SUFFIX = "?id="
@@ -34,11 +34,11 @@ export default class ProfileScreen extends Component<Props>{
             suspended: "",
             cards: [],
             imageUri: null,
-            showCirclePopup: false,
             showNoCardsOnProfile: false,
             showPopup: false,
             requestAmount: null,
             selectedCardId: null,
+            shortDescription: null,
             requestSubmitButtonColors: Constants.BUTTON_COLORS,
             requestSubmitButtonText: UIStrings.TITLE_SEND
         }
@@ -105,17 +105,13 @@ export default class ProfileScreen extends Component<Props>{
         this._isMounted = false;
     }
 
-    onCirclePress(){
-      this.setState((prevState)=> ({showCirclePopup: !prevState.showCirclePopup}));
-    }
-
     onRequestPress(item){
       this.setState({ recipientName: this.state.name, selectedCardName: item.name, selectedCardId: item.id, showPopup: true,
                     requestSubmitButtonColors: Constants.BUTTON_COLORS, requestSubmitButtonText: UIStrings.TITLE_SEND });
     }
   
     async onRequestSubmit(){
-      const {requestAmount, selectedCardId} = this.state
+      const {requestAmount, selectedCardId, shortDescription} = this.state
       if (requestAmount < 1){
         Utilities.showLongToast(UIStrings.ENTER_VALID_AMOUNT);
         return;
@@ -125,7 +121,7 @@ export default class ProfileScreen extends Component<Props>{
       fetch(Constants.SERVER_ENDPOINT + NEW_ACCESS_REQUEST_API, 
         {
           method: Constants.POST_METHOD, 
-          body: JSON.stringify({ to: this.userId, cardId: selectedCardId, amount: requestAmount }),
+          body: JSON.stringify({ to: this.userId, cardId: selectedCardId, amount: requestAmount, shortDesc: shortDescription }),
           headers: await AuthHelpers.getRequestHeaders()
         })
       .then((response)=>{
@@ -164,13 +160,7 @@ export default class ProfileScreen extends Component<Props>{
     {
         return(
           <View style={{flexDirection: 'column', height: "100%", width: '100%'}}>
-            <StatusBar  backgroundColor={Constants.APP_THEME_COLORS[0]} />
-            {
-              this.userId == null ? 
-                <TopRightButton color={Constants.BACKGROUND_WHITE_COLOR} iconName="pencil-alt" onPress={()=>this.editCards()}/>
-                : 
-                null
-            }
+            <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
 
             {/* Popup view */}
             {
@@ -178,19 +168,29 @@ export default class ProfileScreen extends Component<Props>{
                   <View style={CommonStyles.popupContainer}>
                     <View style={CommonStyles.popup}>
                       <TopRightButton color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} iconName="times" onPress={()=>{this.setState({showPopup: false})}} height={50}/>
-                      <Text style={CommonStyles.popupTitle}>{UIStrings.TITLE_NEW_REQUEST}</Text>
-                      <Text numberOfLines={1} style={CommonStyles.popupText}>
-                        {UIStrings.TO_COLON}{this.state.recipientName}
-                      </Text>
-                      <Text numberOfLines={1} style={[{marginTop: 30}, CommonStyles.popupText ]}>
-                        {UIStrings.CARD_COLON}{this.state.selectedCardName}
-                      </Text>
-                      <View style={{flexDirection: 'row', marginTop: 13, marginBottom: 30, justifyContent: 'center', alignContent: 'center'}}>
-                        <Text style={CommonStyles.popupText}>{UIStrings.AMOUNT_COLON}</Text>
-                        <Input onChangeText={(val)=>this.setState({requestAmount: val})} style={{ fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }}
-                                placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
-                                placeholder={UIStrings.PLACEHOLDER_REQUEST_AMOUNT}
-                                keyboardType="number-pad" />
+                      <Icon name={Constants.CARD_REQUEST_ICON_NAME} type={Constants.CARD_REQUEST_ICON_TYPE} style={{padding: 10, alignSelf: 'center', fontSize: 100, color: Constants.APP_THEME_COLORS[0]}}/>
+                      <Text style={[CommonStyles.popupTitle, {marginBottom: 40}]}>{UIStrings.TITLE_NEW_REQUEST}</Text>
+                      <View style={{flexDirection:'row', justifyContent: 'space-between',marginBottom: 20, overflow: 'hidden'}}>
+                        <Text style={styles.arPopupTextName}>To:</Text>
+                        <Text numberOfLines={1} style={styles.arPopupTextValue}> {this.state.recipientName}  </Text>
+                      </View >
+                      <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 20, overflow: 'hidden'}}>
+                        <Text style={styles.arPopupTextName}>{UIStrings.CARD_COLON}</Text>
+                        <Text numberOfLines={1} style={styles.arPopupTextValue}> {this.state.selectedCardName} </Text>
+                      </View>
+                      <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 20}}>
+                        <Text style={styles.arPopupTextName}>{UIStrings.AMOUNT_COLON}</Text>
+                        <TextInput onChangeText={(val)=>this.setState({requestAmount: val})} style={{marginLeft: 10, width: 150, alignSelf: 'center', borderWidth: 0.3, borderRadius: 8, borderColor: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }}
+                                  placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} placeholder={UIStrings.PLACEHOLDER_ENTER_AMOUNT}
+                                  keyboardType="number-pad" />
+                      </View>
+                      <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 20}}>
+                        <Text style={styles.arPopupTextName}>{UIStrings.WHAT_FOR_COLON}</Text>
+                        <TextInput onChangeText={(val)=>this.setState({shortDescription: val})} 
+                                  style={{marginLeft: 10, width: 150, alignSelf: 'center', borderWidth: 0.3, borderRadius: 8, borderColor: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }}
+                                  placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} 
+                                  maxLength={Constants.SHORT_DESCRIPTION_MAX_LENGTH}
+                                  placeholder={UIStrings.PLACEHOLDER_SHORT_DESCRIPTION} />
                       </View>
                       <GradientButton colors={this.state.requestSubmitButtonColors} onPress={()=>this.onRequestSubmit()} title={this.state.requestSubmitButtonText} />
                     </View>
@@ -201,32 +201,46 @@ export default class ProfileScreen extends Component<Props>{
              {/* Banner with Image */}
              <View style={{ position: "absolute", top: 0, height: Constants.SMALL_BANNER_HEIGHT, width: "100%"}}>
               <LinearGradient colors={Constants.APP_THEME_COLORS} style={{width: '100%', height: '100%'}} >
-                <Image resizeMethod="resize" source={{uri: this.state.imageUri}} style={{ alignSelf: 'center', marginTop: '11%', width:110, height: 110, borderRadius: 55, overflow: 'hidden'}}/>
+                <Image defaultSource={require('../assets/resources/default_user.png')} resizeMethod="resize" source={{uri: this.state.imageUri}} style={{backgroundColor: Constants.IMAGE_DEFAULT_BKGD_COLOR, alignSelf: 'center', marginTop: '11%', width:110, height: 110, borderRadius: 55, overflow: 'hidden'}}/>
               </LinearGradient>
              </View>
 
              {/* Arch */}
              <View style={{position: "absolute", borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderRadius: 50, bottom: 0, height: Constants.LARGE_ARCH_SCREEN_HEIGHT, width: "100%", backgroundColor: Constants.BACKGROUND_WHITE_COLOR}}>
-               <ScrollView scrollEnabled={true} style={{flex: 1, marginHorizontal: "8%", marginTop: "15%", marginBottom: Constants.BOTTOM_MENU_HEIGHT}}>
-                  {this.state.loading ? <ActivityIndicator size="large" color={Constants.APP_LOADING_COLOR}/> : null}
+               <ScrollView scrollEnabled={true} style={{flex: 1, marginHorizontal: "8%", marginTop: "10%", marginBottom: Constants.BOTTOM_MENU_HEIGHT}}>
+                  {this.state.loading ? 
+                    <LottieView style={{alignSelf: 'center', width: '70%', height: 90, marginVertical: 20, marginHorizontal: 10}} 
+                      source={require("../assets/resources/loading.json")} autoPlay loop />
+                    :
+                    null}
                   <View style={{flexDirection: 'row', padding: 10}}>
                       <Icon name="user" type="FontAwesome5" style={styles.icon} />
                       <Text numberOfLines={1} style={styles.infoTitle}>{this.state.name}</Text>
                   </View>
                   <View style={styles.line} />
                   <View style={{flexDirection: 'row', padding: 10}}>
-                      <Icon name="phone" type="FontAwesome5" style={styles.icon} />
+                      <Icon name="phone" type="FontAwesome" style={styles.icon} />
                       <Text style={styles.infoTitle}>{this.state.phoneNumber}</Text>
                   </View>
                   <View style={styles.line} />
+
+                  {/* Show the cards */}
                   {
                     this.state.showNoCardsOnProfile ? 
                       <Text style={[styles.infoTitle, {padding: 10, textAlign: 'center'}]}>{UIStrings.NO_CARDS_ON_PROFILE}</Text>
                       :
                       <View>
+                        {this.userId == null ?
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                          <Text style={{paddingLeft: '5%', fontFamily: Constants.APP_BODY_FONT, fontSize: 12, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.CARDS_COLON}{this.state.cards.length}</Text>
+                          <Icon onPress={()=>this.editCards()} name="edit" type="FontAwesome" style={{paddingRight: '5%', textAlign: 'right', fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}/>
+                        </View>
+                          : 
+                          null
+                        }
                         {
                           this.userId == null ?
-                          <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 20}} horizontal={true} data={this.state.cards} 
+                          <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 10}} horizontal={true} data={this.state.cards} 
                           renderItem={({ item })=> (
                                       <CreditCardWithText name={this.state.name} title={item.name} colors={Utilities.getColorForCard(item.id)} />
                                   )} />
@@ -234,7 +248,7 @@ export default class ProfileScreen extends Component<Props>{
                           <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 20}} horizontal={true} data={this.state.cards} 
                           renderItem={({ item })=> (
                                         <CreditCardWithButton title={item.name} colors={Utilities.getColorForCard(item.id)}
-                                        leftButtonParams={{caption: UIStrings.REQUEST, icon: "paper-plane", type: "FontAwesome", onPress: ()=> this.onRequestPress(item)}} 
+                                        leftButtonParams={{caption: UIStrings.REQUEST, icon: Constants.CARD_REQUEST_ICON_NAME, type: Constants.CARD_REQUEST_ICON_TYPE, onPress: ()=> this.onRequestPress(item)}} 
                                         rightButtonParams={{caption: UIStrings.CALL, icon: "phone", onPress: ()=> Utilities.goToDialScreen(this.state.phoneNumber)}} />
                                     )} />
                         }
@@ -245,20 +259,13 @@ export default class ProfileScreen extends Component<Props>{
                </ScrollView>
              </View>
 
-            {/* Circle popup */}
-            { <CirclePopup  onClose={()=>this.onCirclePress()} isVisible={this.state.showCirclePopup} navigate={this.props.navigation.navigate} />  }
-
             {/* Bottom menu */}
             <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 100, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="FontAwesome5" caption={UIStrings.HOME}  onPress={()=>NavigationHelpers.clearStackAndNavigate('UserHome', this.props.navigation)} />
-                <IconWithCaptionButton icon="user" iconType="FontAwesome5" caption={UIStrings.PROFILE} onPress={()=>{if (this.userId != null){this.props.naviation.navigate('Profile')}}} />
-                <TouchableOpacity onPress={()=>this.onCirclePress()} style={{alignContent: 'center', justifyContent: 'center'}}>
-                  <View style={{flexDirection: "column", justifyContent: 'center', marginHorizontal: 5, alignContent: 'center'}}>
-                    <Image source={require('../assets/logo/logo_tp.png')} style={{width: 34, height: 34, borderRadius: 17, alignSelf: 'center'}} />
-                  </View>
-                </TouchableOpacity>
-                <IconWithCaptionButton icon="paper-plane" iconType="FontAwesome5" caption={UIStrings.TITLE_CONTACT_US} onPress={()=>{this.props.navigation.navigate('ContactUs')}}/>
-                <IconWithCaptionButton icon="log-out" iconType="Ionicons" caption={UIStrings.SIGN_OUT} onPress={()=>NavigationHelpers.logout(this.props.navigation) } />
+                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
+                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
             </View>
 
             </View>
@@ -312,5 +319,18 @@ const styles = StyleSheet.create({
       paddingBottom: 5,
       overflow: 'hidden',
       textAlignVertical: 'center',
+    },
+    arPopupTextValue:{
+      fontFamily: Constants.APP_BODY_FONT, 
+      fontSize: 15,
+      textAlign: 'center',
+      color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
+    },
+    arPopupTextName:{
+      fontFamily: Constants.APP_BODY_FONT, 
+      fontSize: 12,
+      textAlign: 'center',
+      textAlignVertical: 'center',
+      color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
     }
 });

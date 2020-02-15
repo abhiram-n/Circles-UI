@@ -4,8 +4,8 @@ import * as Constants from "../helpers/Constants";
 import { Button, Icon } from "native-base";
 import LinearGradient from "react-native-linear-gradient";
 
-const RowWithTextLeftAndRight = ({leftText, rightText}) => (
-    <View style={styles.container} >
+const RowWithTextLeftAndRight = ({leftText, rightText, backgroundColor}) => (
+    <View style={[styles.container, {backgroundColor: backgroundColor ?? Constants.BACKGROUND_GREY_COLOR}]} >
         <Text numberOfLines={1} style={styles.leftText}>{leftText}</Text>
         <Text numberOfLines={1} style={styles.rightText}>{rightText}</Text>
    </View>
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
         width: '70%', 
         overflow: 'hidden', 
         fontFamily: Constants.APP_SUBTITLE_FONT, 
-        color: Constants.HEADING_COLOR
+        color: Constants.BRAND_BACKGROUND_COLOR
     }
 });
 

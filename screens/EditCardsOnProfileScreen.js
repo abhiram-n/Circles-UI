@@ -8,7 +8,7 @@ import {
   Linking,
   FlatList
 } from "react-native";
-import { ActivityIndicator, Picker, TextInput, ToastAndroid, StatusBar, Image } from "react-native";
+import { ActivityIndicator, Picker, TextInput, ToastAndroid, StatusBar, Image, TouchableOpacity, ScrollView } from "react-native";
 import { Button, Icon, InputGroup, Input } from "native-base";
 import { createStackNavigator, createAppContainer } from "react-navigation";
 import SearchableDropdown from "react-native-searchable-dropdown";
@@ -23,9 +23,9 @@ import LogInScreen from "./LogInScreen";
 import CommonStyles from '../components/CommonStyles';
 import LinearGradient from "react-native-linear-gradient";
 import CreditCardWithText from "../components/CreditCardWithText";
-import CirclePopup from "../components/CirclePopup";
 import IconWithCaptionButton from '../components/IconWithCaptionButton';
 import GradientButton from "../components/GradientButton";
+import LottieView from 'lottie-react-native';
 
 const REGULAR_CARDS_API = "/card/filter?type=Regular";
 const UPDATE_CARDS_API = "/user/updateCards"
@@ -37,7 +37,6 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
             cards: [],
             loading: false,
             selectedCards: [],
-            showCirclePopup: false
         }
 
         this.name = this.props.navigation.getParam("name");
@@ -147,19 +146,25 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
         });
     }
 
-    onCirclePress(){
-      this.setState((prevState)=> ({showCirclePopup: !prevState.showCirclePopup}));
+    getCardsAddedText(){
+      return UIStrings.CARDS_ADDED_PREFIX + this.state.selectedCards.length + UIStrings.CARDS_ADDED_SUFFIX;
     }
 
     render(){
         return (
-            <View style={styles.container}>
-              <StatusBar translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
+            <View  style={styles.container}>
+            <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
               <View style={{width: "100%", marginTop: 40}}>
                   <Text style={{fontSize: 25, textAlign: 'center', fontFamily: Constants.APP_BODY_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.ADD_OR_DELETE_CARDS}</Text>
               </View>
-              <View style={{marginTop: 60, width: '100%'}}>
-                {this.state.loading ?  <ActivityIndicator color={Constants.APP_LOADING_COLOR} size="large" />  : null}
+              <View style={{marginTop: 20, width: '100%'}}>
+                {
+                  this.state.loading ?  
+                  <LottieView style={{alignSelf: 'center', width: '70%', height: 80, marginVertical: 20, marginHorizontal: 10}} 
+                  source={require("../assets/resources/loading.json")} autoPlay loop />
+                  : 
+                  null
+                }
                 <SearchableDropdown
                   onItemSelect={item => {
                     this.onSelectCardItem(item);
@@ -169,7 +174,7 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
                   itemStyle={styles.dropdownItem}
                   itemTextStyle={{ color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_BODY_FONT}}
                   itemsContainerStyle={{ maxHeight: 140, borderRadius: 15, borderColor: Constants.BACKGROUND_GREY_COLOR, borderWidth: 2, width:'97%', alignSelf: 'center' }}
-                  items={this.cards}
+                  items={this.state.cards}
                   placeholder={UIStrings.PLACEHOLDER_ENTER_CARD}
                   placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
                   resetValue={false}
@@ -178,62 +183,48 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
                   textInputProps={{
                     underlineColorAndroid: "transparent",
                     style: {
-                    padding: 12,
-                    borderRadius: 20,
-                    elevation: 4,
-                    width: '100%', 
-                    color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
-                    fontFamily: 'Montserrat-Light'
+                      padding: 12,
+                      width: '100%', 
+                      color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
+                      fontFamily: 'Montserrat-Light',
+                      marginTop: 8, 
+                      alignSelf: 'center',
+                      backgroundColor: Constants.BACKGROUND_WHITE_COLOR,
+                      borderRadius: 20,
+                      elevation: 10 
                   }}}
                 />
-                <Text style={{
-                    color: Constants.APP_TEXT_COLOR,
-                    textAlign: "center",
-                    fontFamily: "Montserrat-Light",
-                    fontWeight: 'bold'
-                  }}
-                >
-                  You selected:
-                </Text>
-
-                <View >
-                  <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 20}} horizontal={true} data={this.state.selectedCards} 
-                    renderItem={({ item })=> (
-                                  <CreditCardWithText name={this.name} title={item.name} 
-                                  onDeletePress={()=>this.onCardDelete(item)} colors={Utilities.getColorForCard(item.id)} />
-                              )} />
-                </View>
-                
-                <View style={{alignSelf: 'center', marginTop: 30}}>
-                  <GradientButton title={UIStrings.TITLE_SAVE} onPress={()=>{this.onSave();}} />
-                </View>
               </View>
 
-            {/* Circle options */}
-            { <CirclePopup  onClose={()=>this.onCirclePress()} isVisible={this.state.showCirclePopup} navigate={this.props.navigation.navigate} />  }
+                <View style={{marginTop: 50, paddingHorizontal: 15, marginBottom: 25}}>
+                  <Text style={{paddingLeft: 10, fontSize: 12, fontFamily: Constants.APP_BODY_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{this.getCardsAddedText()}</Text>
+                  <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 20}} horizontal={true} data={this.state.selectedCards} 
+                    renderItem={({ item })=> (
+                        <CreditCardWithText name={this.name} title={item.name} 
+                        onDeletePress={()=>this.onCardDelete(item)} colors={Utilities.getColorForCard(item.id)} />
+                    )} />
+              </View>
+                
+              <GradientButton title={UIStrings.TITLE_SAVE} onPress={()=>{this.onSave();}} />
 
               {/* Bottom menu */}
               <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                  <IconWithCaptionButton icon="home" iconType="FontAwesome5" caption={UIStrings.HOME} onPress={()=>NavigationHelpers.clearStackAndNavigate('UserHome', this.props.navigation)} />
-                  <IconWithCaptionButton icon="user" iconType="FontAwesome5" caption={UIStrings.PROFILE} onPress={()=>{this.props.navigation.navigate('Profile')}} />
-                  <TouchableOpacity onPress={()=>this.onCirclePress()} style={{alignContent: 'center', justifyContent: 'center'}}>
-                  <View style={{flexDirection: "column", justifyContent: 'center', marginHorizontal: 5, alignContent: 'center'}}>
-                    <Image source={require('../assets/logo/logo_tp.png')} style={{width: 34, height: 34, borderRadius: 17, alignSelf: 'center'}} />
-                  </View>
-                </TouchableOpacity>
-                  <IconWithCaptionButton icon="paper-plane" iconType="FontAwesome5" caption={UIStrings.TITLE_CONTACT_US} onPress={()=>{this.props.navigation.navigate('ContactUs')}}/>
-                  <IconWithCaptionButton icon="log-out" iconType="Ionicons" caption={UIStrings.SIGN_OUT} onPress={()=>NavigationHelpers.logout(this.props.navigation) } />
+                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
+                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
               </View>
-              </View>
+            </View>
         )
     }
 }
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
       width: '100%', 
-      height: '100%'
+      height: '100%',
+      flex: 1
     },
     welcome: {
       fontSize: Constants.APP_TITLE_SIZE,

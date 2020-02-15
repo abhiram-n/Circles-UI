@@ -23,6 +23,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class CirclesWayModule extends ReactContextBaseJavaModule implements ActivityEventListener {
     ReactApplicationContext reactContext;
+    private final static EXTRA_CHANNEL_ID = "circlesWay"
 
 
     public CirclesWayModule(ReactApplicationContext reactContext) {
@@ -40,7 +41,7 @@ public class CirclesWayModule extends ReactContextBaseJavaModule implements Acti
     public void openChannelSettings(){
         Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
         .putExtra(Settings.EXTRA_APP_PACKAGE, getReactApplicationContext().getPackageName())
-        .putExtra(Settings.EXTRA_CHANNEL_ID, "circlesWay");
+        .putExtra(Settings.EXTRA_CHANNEL_ID, EXTRA_CHANNEL_ID);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getReactApplicationContext().startActivity(intent);
     }
