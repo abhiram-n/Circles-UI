@@ -35,7 +35,7 @@ export default class AllPostsScreen extends Component<Props>{
             count: 0,
             showPostPopup: false,
             newPostText: null,
-            submitPostButtonText: UIStrings.TITLE_SUBMIT,
+            submitPostButtonText: UIStrings.TITLE_SEND,
             submitPostButtonColors: Constants.BUTTON_COLORS
         };
 
@@ -43,7 +43,7 @@ export default class AllPostsScreen extends Component<Props>{
 
     componentDidMount(){
         this._isMounted = true;
-        firebase.analytics().setCurrentScreen("AllPosts");
+        firebase.analytics().setCurrentScreen("AllPosts", "AllPostsScreen");
         this.getUserPosts();
     }
 
@@ -118,7 +118,7 @@ export default class AllPostsScreen extends Component<Props>{
             return;
         }
 
-        this.setState({submitPostButtonText: UIStrings.TITLE_SUBMITTING});
+        this.setState({submitPostButtonText: UIStrings.SENDING});
         fetch(Constants.SERVER_ENDPOINT + NEW_POST_API, {
             method: Constants.POST_METHOD,
             headers: await AuthHelpers.getRequestHeaders(),
@@ -130,13 +130,13 @@ export default class AllPostsScreen extends Component<Props>{
             }
 
             if (response.ok){
-                this.setState({submitPostButtonColors: Constants.SUCCESS_COLORS, submitPostButtonText: UIStrings.SUBMITTED})
+                this.setState({submitPostButtonColors: Constants.SUCCESS_COLORS, submitPostButtonText: UIStrings.SENT})
                 setTimeout(() => this.setState({showPostPopup: false}), 1000);
                 Utilities.showLongToast(UIStrings.POST_SUBMITTED);
                 return null;
             }
 
-            this.setState({submitPostButtonText: UIStrings.TITLE_SUBMIT})
+            this.setState({submitPostButtonText: UIStrings.TITLE_SEND})
             if (response.status == Constants.TOKEN_EXPIRED_STATUS_CODE){
                 Utilities.showLongToast(UIStrings.SESSION_EXPIRED);
                 return null;
@@ -150,14 +150,14 @@ export default class AllPostsScreen extends Component<Props>{
                 return null;
             }
             
-            this.setState({submitPostButtonText: UIStrings.TITLE_SUBMIT})
+            this.setState({submitPostButtonText: UIStrings.TITLE_SEND})
             Utilities.showLongToast(UIStrings.GENERIC_ERROR);
             console.log('Error posting: ' + err);
         })
     }
 
     openPostPopup(){
-        this.setState({showPostPopup: true, submitPostButtonColors: Constants.BUTTON_COLORS, submitPostButtonText: UIStrings.TITLE_SUBMIT});
+        this.setState({showPostPopup: true, submitPostButtonColors: Constants.BUTTON_COLORS, submitPostButtonText: UIStrings.TITLE_SEND});
     }
 
     render()
@@ -165,7 +165,7 @@ export default class AllPostsScreen extends Component<Props>{
         return (
             <View style={{flexDirection: 'column', height: "100%", width: '100%'}}>
             <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
-            <TouchableOpacity onPress={()=>this.openPostPopup()} style={{zIndex: 100, position: 'absolute', top: 20, right: 10, borderRadius: 20, width: 40, height: 40, backgroundColor: Constants.SUCCESS_COLOR, justifyContent: 'center'}}>
+            <TouchableOpacity onPress={()=>this.openPostPopup()} style={{zIndex: 100, position: 'absolute', top: 30, right: 10, borderRadius: 20, width: 40, height: 40, backgroundColor: Constants.SUCCESS_COLOR, justifyContent: 'center'}}>
                 <Icon name="notification" type="AntDesign" style={{color: 'white', fontSize: 16, textAlign: 'center'}} />
             </TouchableOpacity>
 
@@ -175,12 +175,12 @@ export default class AllPostsScreen extends Component<Props>{
                   <View style={CommonStyles.popupContainer}>
                     <View style={CommonStyles.popup}>
                       <TopRightButton color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} iconName="times" onPress={()=>{this.setState({showPostPopup: false})}} height={50}/>
-                      <LottieView style={{alignSelf: 'center', width: '70%', height: 125, marginVertical: 5, marginHorizontal: 10}} 
+                      <LottieView style={{alignSelf: 'center', width: '70%', height: 125, marginHorizontal: 10}} 
                         source={require("../assets/resources/post.json")} autoPlay loop />
                       <Text style={[CommonStyles.popupTitle, {marginBottom: 0}]}>{UIStrings.NEW_POST}</Text>
                       <Text style={CommonStyles.popupSubtitle}>{UIStrings.ONLY_USERS_CIRCLE_NOTIFIED}</Text>
-                      <View style={{ marginTop: 13, marginBottom: 30, alignSelf: 'center', justifyContent: 'center', alignContent: 'center', width: '90%', height: 100}}>
-                        <Input onChangeText={(val)=>this.setState({newPostText: val})} style={{borderRadius: 10, borderWidth: 1, borderColor: Constants.BACKGROUND_GREY_COLOR, width: '100%', height: 100, fontSize: 13, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }}
+                      <View style={{ marginBottom: 20, alignSelf: 'center', justifyContent: 'center', alignContent: 'center', width: '100%', height: 100}}>
+                        <Input onChangeText={(val)=>this.setState({newPostText: val})} style={{backgroundColor: Constants.BACKGROUND_GREY_COLOR,borderRadius: 10, borderWidth: 2, borderColor: Constants.BACKGROUND_GREY_COLOR, width: '100%', height: 100, fontSize: 13, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }}
                                 placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} maxLength={Constants.MAX_POST_LENGTH_SIZE}
                                 placeholder={UIStrings.FIRE_AWAY} multiline={true} />
                       </View>
@@ -193,8 +193,8 @@ export default class AllPostsScreen extends Component<Props>{
              {/* Banner */}
              <View style={{justifyContent: "center", flexDirection: 'column', position: "absolute", top: 0, height: Constants.EXTRA_SMALL_BANNER_HEIGHT, width: "100%"}}>
               <LinearGradient colors={Constants.APP_THEME_COLORS} style={{alignContent: 'center', justifyContent: "center", flexDirection: 'column', width: '100%', height: '100%'}}>
-                <Text style={{textAlign: 'center', marginBottom: 5, fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.POSTS_IN_CIRCLE}</Text>
-                <Text style={{textAlign: 'center', marginBottom: 20, fontFamily: Constants.APP_THIN_FONT, fontSize: 14, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>This is a short description for the page</Text>
+                <Text style={{textAlign: 'center', marginBottom: 5, fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.BROADCASTS}</Text>
+                <Text style={{textAlign: 'center', marginBottom: 20, fontFamily: Constants.APP_BODY_FONT, fontSize: 12, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>Announce something that helps your Circle save</Text>
               </LinearGradient>
              </View>
 
@@ -245,12 +245,11 @@ export default class AllPostsScreen extends Component<Props>{
              </View>
 
               {/* Bottom menu */}
-              <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+              <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
               </View>
              </View>
         );
@@ -321,7 +320,7 @@ const styles = StyleSheet.create({
         textAlign: 'center', 
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
         fontFamily: Constants.APP_BODY_FONT,
-        fontSize: 12,
+        fontSize: 11,
         padding: 5 
     }
 })

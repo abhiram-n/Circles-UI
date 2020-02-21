@@ -40,15 +40,15 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
         }
 
         this.name = this.props.navigation.getParam("name");
+        this.numInitialCards = 0;
     }
 
     componentDidMount(){
+        firebase.analytics().setCurrentScreen("EditCardsOnProfile", "EditCardsOnProfileScreen");
         this._isMounted = true;
         let cards = JSON.parse(this.props.navigation.getParam("cards"));
-        this.setState({
-            loading: true, 
-            selectedCards: cards.map((item) => { 
-              return {name: item.name, id: item.id, key: item.id.toString()}})});
+        this.setState({ loading: true,  selectedCards: cards.map((item) => {  return {name: item.name, id: item.id, key: item.id.toString()}})}, 
+                      ()=>{this.numInitialCards = this.state.selectedCards.length});
 
         fetch(Constants.SERVER_ENDPOINT + REGULAR_CARDS_API, { method: "GET" })
         .then(response => {
@@ -112,6 +112,7 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
     async onSave(){
         this.setState({loading: true});
         let headers = await AuthHelpers.getRequestHeaders();
+        firebase.analytics().logEvent("changeCards", {numInitialCards: this.numInitialCards, numFinalCards: this.state.selectedCards.length});
         fetch(Constants.SERVER_ENDPOINT + UPDATE_CARDS_API, { method: "POST", 
         headers: headers,
         body: JSON.stringify({
@@ -201,19 +202,18 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
                   <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 20}} horizontal={true} data={this.state.selectedCards} 
                     renderItem={({ item })=> (
                         <CreditCardWithText name={this.name} title={item.name} 
-                        onDeletePress={()=>this.onCardDelete(item)} colors={Utilities.getColorForCard(item.id)} />
+                        onDeletePress={()=>this.onCardDelete(item)} imgName={Utilities.getCardTemplateForCard(item.id)} />
                     )} />
               </View>
                 
               <GradientButton title={UIStrings.TITLE_SAVE} onPress={()=>{this.onSave();}} />
 
               {/* Bottom menu */}
-              <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+              <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
               </View>
             </View>
         )

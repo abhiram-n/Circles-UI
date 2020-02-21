@@ -37,7 +37,7 @@ export default class AllFriendRequestsScreen extends Component<Props>{
 
     componentDidMount(){
         this._isMounted = true;
-        firebase.analytics().setCurrentScreen("AllFriendRequests");
+        firebase.analytics().setCurrentScreen("AllFriendRequests", "AllFriendRequestsScreen");
         this.getUserRequests();
     }
 
@@ -144,15 +144,15 @@ export default class AllFriendRequestsScreen extends Component<Props>{
         return (
             <View style={{flexDirection: 'column', height: "100%", width: '100%'}}>
             <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
-            <TouchableOpacity onPress={()=>this.props.navigation.navigate('AddToCircle')} style={{zIndex: 100, position: 'absolute', top: 20, right: 10, borderRadius: 20, width: 40, height: 40, backgroundColor: Constants.SUCCESS_COLOR, justifyContent: 'center'}}>
+            <TouchableOpacity onPress={()=>this.props.navigation.navigate('AddToCircle')} style={{zIndex: 100, position: 'absolute', top: 30, right: 10, borderRadius: 20, width: 40, height: 40, backgroundColor: Constants.SUCCESS_COLOR, justifyContent: 'center'}}>
                 <Icon name="adduser" type="AntDesign" style={{color: 'white', fontSize: 16, textAlign: 'center'}} />
             </TouchableOpacity>
 
              {/* Banner */}
              <View style={{justifyContent: "center", flexDirection: 'column', position: "absolute", top: 0, height: Constants.EXTRA_SMALL_BANNER_HEIGHT, width: "100%"}}>
               <LinearGradient colors={Constants.APP_THEME_COLORS} style={{alignContent: 'center', justifyContent: "center", flexDirection: 'column', width: '100%', height: '100%'}}>
-                <Text style={{textAlign: 'center', marginBottom: 5, fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.ADD_TO_CIRCLE_REQUESTS}</Text>
-                <Text style={{textAlign: 'center', marginBottom: 20, fontFamily: Constants.APP_THIN_FONT, fontSize: 14, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>This is a short description for the page</Text>
+                <Text style={{textAlign: 'center', marginBottom: 5, fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.CIRCLE_INVITES}</Text>
+                <Text style={{textAlign: 'center', marginBottom: 20, fontFamily: Constants.APP_BODY_FONT, fontSize: 12, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.MANAGE_CIRCLE_INVITES}</Text>
               </LinearGradient>
              </View>
 
@@ -203,12 +203,11 @@ export default class AllFriendRequestsScreen extends Component<Props>{
              </View>
 
               {/* Bottom menu */}
-              <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+              <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
               </View>
              </View>
         );
@@ -279,7 +278,7 @@ const styles = StyleSheet.create({
         textAlign: 'center', 
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
         fontFamily: Constants.APP_BODY_FONT,
-        fontSize: 12,
+        fontSize: 11,
         padding: 5 
     }
 })

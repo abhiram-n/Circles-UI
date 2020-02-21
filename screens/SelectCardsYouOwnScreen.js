@@ -39,6 +39,7 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
 
     componentDidMount(){
         this._isMounted = true;
+        firebase.analytics().setCurrentScreen("SelectCardsYouOwn", "SelectCardsYouOwnScreen");
         if (this.state.allCards == Constants.NONE || this.state.allCards == null || this.state.allCards == []){
           this.getListOfCards();
         }
@@ -86,7 +87,7 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
       this.setState({ loading: true });
       const jsonSelectedCards = JSON.stringify(this.state.selectedCards);
       let fcmToken = await AuthHelpers.getDeviceToken();
-      
+      firebase.analytics().logEvent("CardsOnSignUp", {num: this.state.selectedCards.length});
       fetch(Constants.SERVER_ENDPOINT + SIGN_UP_API, {
         method: Constants.POST_METHOD,
         headers: {
@@ -185,7 +186,7 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
                   textInputStyle={styles.dropdownTextInput}
                   itemStyle={styles.dropdownItem}
                   itemTextStyle={{ color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: Constants.APP_THIN_FONT}}
-                  itemsContainerStyle={{maxHeight: 180, borderRadius: 10, borderWidth: 0.5, borderColor: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, width:'97%', alignSelf: 'center' }}
+                  itemsContainerStyle={{maxHeight: 180, borderRadius: 5, backgroundColor: Constants.INITIAL_SCREEN_TEXT_INPUT_COLOR, borderWidth: 0.4, borderColor: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, width:'98%', alignSelf: 'center' }}
                   items={this.state.allCards}
                   placeholder={UIStrings.PLACEHOLDER_ENTER_CARD}
                   placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
@@ -196,14 +197,13 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
                     underlineColorAndroid: "transparent",
                     style: {
                       padding: 12,
+                      backgroundColor: Constants.INITIAL_SCREEN_TEXT_INPUT_COLOR,
                       width: '100%', 
                       color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
                       fontFamily: 'Montserrat-Thin',
                       marginTop: 8, 
                       alignSelf: 'center',
                       borderRadius: 15,
-                      borderColor: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
-                      borderWidth: 0.5
                   }}}
                 />
             </View>
@@ -216,7 +216,7 @@ export default class SelectCardsYouOwnScreen extends Component<Props>{
               <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 20}} horizontal={true} data={this.state.selectedCards} 
                 renderItem={({ item })=> (
                     <CreditCardWithText name={this.name} title={item.name} 
-                    onDeletePress={()=>this.onCardDelete(item)} colors={Utilities.getColorForCard(item.id)} />
+                    onDeletePress={()=>this.onCardDelete(item)} imgName={Utilities.getCardTemplateForCard(item.id)} />
                 )} />
             </View>
 

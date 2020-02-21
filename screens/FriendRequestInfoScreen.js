@@ -45,7 +45,7 @@ export default class FriendRequestInfoScreen extends Component<Props>{
 
     componentDidMount(){
         this._isMounted = true;
-        firebase.analytics().setCurrentScreen("FriendRequestInfo");
+        firebase.analytics().setCurrentScreen("FriendRequestInfo", "FriendRequestInfoScreen");
         this.getRequestDetails();
     }
 
@@ -116,18 +116,24 @@ export default class FriendRequestInfoScreen extends Component<Props>{
                 return null;
             }
 
+            this.setState({loading: false});
             if (response.ok){
+                if (action == Constants.FRIEND_REQUEST_ACCEPTED){
+                    Utilities.showLongToast(UIStrings.FRIEND_REQUEST_ACCEPTED_BODY_SECOND);
+                    this.props.navigation.navigate({routeName: 'Profile', params: {userId: this.state.partnerId}, key: 'Profile' + this.state.partnerId});
+                    return;
+                }
+
                 Utilities.showLongToast(UIStrings.ACTION_COMPLETED);
                 this.getRequestDetails();
                 return null;
             }
 
             if (response.status == Constants.PRECONDITION_FAILED_STATUS_CODE){
-                Utilities.showLongToast(UIStrings.TOO_MANY_IN_CIRCLE);
+                Utilities.showLongToast(UIStrings.TOO_MANY_IN_CIRCLE.replace('%', Constants.MAX_NUMBER_IN_CIRCLE));
                 return null;
             }
 
-            this.setState({loading: false})
             if (response.status == Constants.TOKEN_EXPIRED_STATUS_CODE){
                 Utilities.showLongToast(UIStrings.SESSION_EXPIRED);
                 return null;
@@ -162,7 +168,8 @@ export default class FriendRequestInfoScreen extends Component<Props>{
     render()
     {
         return (
-        <ScrollView contentContainerStyle={{flexGrow:1}} style={styles.container}>
+        <View style={{flex: 1, width: '100%', height: '100%' }}>
+        <ScrollView contentContainerStyle={{paddingBottom: 50, flexGrow:1}} >
             <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
             {/* The title */}
             <View style={{height: "10%", flexDirection: 'row', justifyContent: 'center', alignContent: 'center', }}>
@@ -218,18 +225,18 @@ export default class FriendRequestInfoScreen extends Component<Props>{
                     : 
                     null 
                 }  
-
             </View>
 
-            {/* Bottom menu */}
-            <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 100, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: 60, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
-            </View>
+
         </ScrollView>
+        {/* Bottom menu */}
+        <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR,  flexDirection: 'row', justifyContent: 'space-between', height: 60, width: '100%', padding: 10}}>
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+        </View>
+        </View>
         );
     }
 }
@@ -237,7 +244,6 @@ export default class FriendRequestInfoScreen extends Component<Props>{
 const styles = StyleSheet.create({
     container:{
         width: '100%',
-        height: '100%',
     },
     icon:{
         width: 50, 

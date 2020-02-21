@@ -37,7 +37,8 @@ export default class AccessRequestInfoScreen extends Component<Props>{
             cardName: null,
             status: null,
             amount: null,
-            shortDescription: null
+            shortDescription: null,
+            cardholdersName: null,
         };
 
         this.isUserSender = this.props.navigation.getParam("isUserSender", true);
@@ -46,7 +47,7 @@ export default class AccessRequestInfoScreen extends Component<Props>{
 
     componentDidMount(){
         this._isMounted = true;
-        firebase.analytics().setCurrentScreen("AccessRequestInfo");
+        firebase.analytics().setCurrentScreen("AccessRequestInfo", "AccessRequestInfoScreen");
         this.getRequestDetails();
     }
 
@@ -83,6 +84,7 @@ export default class AccessRequestInfoScreen extends Component<Props>{
             if (responseJson != null){
                 this.setState({
                     partnerName: this.isUserSender ? responseJson.recipientName : responseJson.senderName,
+                    cardholdersName: responseJson.recipientName,
                     partnerId: this.isUserSender ? responseJson.recipientId : responseJson.senderId,
                     partnerFcmToken: this.isUserSender ? responseJson.recipientFcmToken : responseJson.senderFcmToken,
                     partnerPhoneNumber: this.isUserSender  ? responseJson.recipientPhoneNumber : responseJson.senderPhoneNumber,
@@ -93,7 +95,8 @@ export default class AccessRequestInfoScreen extends Component<Props>{
                     cardId: responseJson.cardId,
                     cardName: responseJson.cardName,
                     createdOn: responseJson.createdOn,
-                    resolvedOn: responseJson.resolvedOn
+                    resolvedOn: responseJson.resolvedOn,
+                    mutualFriendName: responseJson.mutualFriendName
                 })
             }
         })
@@ -174,20 +177,37 @@ export default class AccessRequestInfoScreen extends Component<Props>{
                 return UIStrings.ACCEPTED;
             case Constants.ACCESS_REQUEST_REJECTED_CODE:
                 return UIStrings.DECLINED;
+            case Constants.ACCESS_REQUEST_EXPIRED_CODE:
+                return UIStrings.EXPIRED;
         }
 
         return UIStrings.OPEN;
     }
 
+    getNameToDisplay(partnerName, mutualFriendName){
+        if (mutualFriendName == null || mutualFriendName.length < 1){
+            return partnerName;
+        }
+
+        return this.getSecondDegreeCardholderDisplayName(partnerName, mutualFriendName);
+    }
+
+    getSecondDegreeCardholderDisplayName(secondDegreeFriendName, mutualFriendName){
+        withCardholderName = UIStrings.SECOND_DEGREE_CARDHOLDER_NAME.replace("%0", secondDegreeFriendName);
+        return withCardholderName.replace("%1", mutualFriendName);
+    }
+
     render()
     {
         return (
-        <ScrollView contentContainerStyle={{flexGrow:1}} style={styles.container}>
+        <View style={styles.container}>
+        <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 40}} style={styles.scrollContainer}>
             <StatusBar translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
             {/* The title */}
-            <View style={{ height: "10%", flexDirection: 'row', justifyContent: 'center', alignContent: 'center'}}>
+            <View style={{ height: "10%", flexDirection: 'column', justifyContent: 'center', alignContent: 'center'}}>
                 <Text style={{fontFamily: Constants.APP_TITLE_FONT, fontSize: 18, textAlignVertical:'center', 
                 textAlign: 'center', color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.REQUEST_ACCESS_CARD}</Text>
+                <Text style={{textAlign: 'center', fontSize: 11, fontFamily: Constants.APP_BODY_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>Requests expire in 24 hours</Text>
             </View>
 
             { this.state.loading ? 
@@ -196,19 +216,20 @@ export default class AccessRequestInfoScreen extends Component<Props>{
                 : null }
             
             {/* Request details */}
-            <View style={{paddingVertical: 15,  width: '100%', flexDirection: "column", justifyContent: 'center'}}>
-                    <RowWithTextLeftAndRight leftText={this.isUserSender  ? UIStrings.TO_COLON : UIStrings.FROM_COLON} 
-                                            rightText={this.state.partnerName} />
-                    <RowWithTextLeftAndRight leftText={UIStrings.STATUS_COLON} rightText={this.getStatusTextFromStatus(this.state.status)} />
-                    <RowWithTextLeftAndRight leftText={UIStrings.WHAT_FOR_COLON} rightText={this.state.shortDescription} />
-                    <RowWithTextLeftAndRight leftText={UIStrings.AMOUNT_COLON} rightText={UIStrings.RUPEES_SHORT + this.state.amount} />
-                    <View style={{alignSelf: 'center', alignContent: 'center', marginTop: 10}}>
+            <View style={{paddingBottom: 15, paddingTop: 8, width: '100%', flexDirection: "column", justifyContent: 'center'}}>
+                    <View style={{alignSelf: 'center', alignContent: 'center', marginBottom: 15}}>
                         {this.state.cardId != null ? 
-                            <CreditCardWithText colors={Utilities.getColorForCard(this.state.cardId)} title={this.state.cardName} name={this.state.partnerName} />
+                            <CreditCardWithText imgName={Utilities.getCardTemplateForCard(this.state.cardId)} title={this.state.cardName} name={this.state.cardholdersName} />
                             :
                             null
                         }
-                    </View>
+                    </View>     
+                    <RowWithTextLeftAndRight leftText={this.isUserSender  ? UIStrings.TO_COLON : UIStrings.FROM_COLON} 
+                                rightText={this.getNameToDisplay(this.state.partnerName, this.state.mutualFriendName)}
+                                onPress={()=>Utilities.showLongToast(this.getNameToDisplay(this.state.partnerName, this.state.mutualFriendName))} />
+                    <RowWithTextLeftAndRight leftText={UIStrings.STATUS_COLON} rightText={this.getStatusTextFromStatus(this.state.status)} />
+                    <RowWithTextLeftAndRight leftText={UIStrings.WHAT_FOR_COLON} rightText={this.state.shortDescription} onPress={()=>{if (this.state.shortDescription != null) {Utilities.showLongToast(this.state.shortDescription)}}} />
+                    <RowWithTextLeftAndRight leftText={UIStrings.AMOUNT_COLON} rightText={UIStrings.RUPEES_SHORT + this.state.amount} />
             </View>
 
             {/* Response options */}
@@ -216,7 +237,7 @@ export default class AccessRequestInfoScreen extends Component<Props>{
                 {/* If request open, show response options to recipient */}
                 {
                     this.state.status == Constants.ACCESS_REQUEST_UNACCEPTED_CODE && !this.isUserSender  ?
-                    <View style={{marginTop: 20, borderWidth: 2, borderColor: Constants.APP_THEME_COLORS[1], borderRadius: 20, justifyContent: 'center', alignSelf: 'center', width: '90%', height: 160, flexDirection: 'column'}}>
+                    <View style={{marginTop: 10, borderWidth: 2, borderColor: Constants.APP_THEME_COLORS[1], borderRadius: 20, justifyContent: 'center', alignSelf: 'center', width: '90%', height: 160, flexDirection: 'column'}}>
                         <TouchableOpacity onPress={()=>this.onAccept()} style={{flexDirection: 'row', padding: 10}}>
                             <Icon name="rocket" type="FontAwesome5" style={[styles.icon, {color: Constants.SUCCESS_COLOR}]} />
                             <View style={{flexDirection: 'column', alignSelf: 'center'}}>
@@ -240,7 +261,7 @@ export default class AccessRequestInfoScreen extends Component<Props>{
                 {/* If request was accepted, show option to go to chat */}
                 {
                     this.state.status == Constants.ACCESS_REQUEST_ACCEPTED_CODE  ?
-                    <View style={{marginTop: 20, borderWidth: 2, borderColor: Constants.APP_THEME_COLORS[1], borderRadius: 20, justifyContent: 'center', alignSelf: 'center', width: '90%', height: 80, flexDirection: 'column'}}>
+                    <View style={{marginTop: 10, borderWidth: 2, borderColor: Constants.APP_THEME_COLORS[1], borderRadius: 20, justifyContent: 'center', alignSelf: 'center', width: '90%', height: 80, flexDirection: 'column'}}>
                         <TouchableOpacity onPress={()=>this.goToChat()} style={{flexDirection: 'row', padding: 10}}>
                             <Icon name="comments" type="FontAwesome" style={[styles.icon, {color: Constants.SUCCESS_COLOR}]} />
                             <View style={{flexDirection: 'column', alignSelf: 'center'}}>
@@ -248,7 +269,7 @@ export default class AccessRequestInfoScreen extends Component<Props>{
                                 <Text style={styles.responseButtonSubtitle}>{UIStrings.RESUME_ENCRYPTED_CHAT}</Text>
                             </View>
                         </TouchableOpacity>
-                    </View>
+                    </View> 
                     :
                     null
                 }
@@ -256,7 +277,7 @@ export default class AccessRequestInfoScreen extends Component<Props>{
                 {/* If request is open, show awaiting response */}
                 {
                     this.state.status == Constants.ACCESS_REQUEST_UNACCEPTED_CODE && this.isUserSender ?
-                    <View style={{justifyContent: 'center', alignSelf: 'center', borderRadius: 20, height: 80, width: '90%', borderWidth: 2, borderColor: Constants.APP_THEME_COLORS[1], marginTop: 5}}>
+                    <View style={{justifyContent: 'center', alignSelf: 'center', borderRadius: 20, height: 80, width: '90%', borderWidth: 2, borderColor: Constants.APP_THEME_COLORS[1], marginTop: 10}}>
                         <Text numberOfLines={1} style={{paddingHorizontal: 5, textAlign: 'center', textAlignVertical: 'center', fontFamily: Constants.APP_SUBTITLE_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>
                             {UIStrings.AWAITING_RESPONSE_FROM}{this.state.partnerName}
                         </Text>
@@ -264,25 +285,40 @@ export default class AccessRequestInfoScreen extends Component<Props>{
                     :
                     null
                 }
+
+                {/* If request is expired, show expired text */}
+                {
+                    this.state.status == Constants.ACCESS_REQUEST_EXPIRED_CODE ?
+                    <View style={{justifyContent: 'center', alignSelf: 'center', borderRadius: 20, height: 80, width: '90%', borderWidth: 2, borderColor: Constants.APP_THEME_COLORS[1], marginTop: 10}}>
+                        <Text numberOfLines={1} style={{paddingHorizontal: 5, textAlign: 'center', textAlignVertical: 'center', fontFamily: Constants.APP_SUBTITLE_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>
+                            {UIStrings.SORRY_REQUEST_EXPIRED}
+                        </Text>
+                    </View>
+                    :
+                    null
+                }                
             </View>
 
-            {/* Bottom menu */}
-            <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 100, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: 60, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
-            </View>
+
         </ScrollView>
+        {/* Bottom menu */}
+        <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR,  flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+        </View>
+        </View>
         );
     }
 }
 
 const styles = StyleSheet.create({
     container:{
+        flex: 1
+    },
+    scrollContainer:{
         width: '100%',
-        height: '100%',
     },
     icon:{
         width: 50, 

@@ -54,7 +54,7 @@ export function getCardTemplateForCard(itemId){
 
   numTemplates = Constants.CARD_TEMPLATE_NAMES.length;
   templateIndex = itemId % numTemplates;
-  return Constants.RESOURCE_PATH_PREFIX + Constants.CARD_TEMPLATE_NAMES[templateIndex];
+  return Constants.CARD_TEMPLATE_NAMES[templateIndex];
 }
 
 export function getColorForCard(itemId){
@@ -65,4 +65,12 @@ export function getColorForCard(itemId){
   numColors = Constants.CARDS_COLORS.length;
   colorId = itemId % numColors;
   return Constants.CARDS_COLORS[colorId];
+}
+
+export function getFirstName(name){
+  if (name == null || name == '' || name.indexOf(' ') == -1){
+    return name;
+  }
+
+  return name.split(" ")[0];
 }

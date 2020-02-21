@@ -4,10 +4,10 @@ import * as Constants from "../helpers/Constants";
 import { Button, Icon } from "native-base";
 import LinearGradient from "react-native-linear-gradient";
 
-const RowWithTextLeftAndRight = ({leftText, rightText, backgroundColor}) => (
+const RowWithTextLeftAndRight = ({leftText, rightText, backgroundColor, onPress}) => (
     <View style={[styles.container, {backgroundColor: backgroundColor ?? Constants.BACKGROUND_GREY_COLOR}]} >
-        <Text numberOfLines={1} style={styles.leftText}>{leftText}</Text>
-        <Text numberOfLines={1} style={styles.rightText}>{rightText}</Text>
+        <Text onPress={onPress} numberOfLines={1} style={styles.leftText}>{leftText}</Text>
+        <Text onPress={onPress} numberOfLines={1} style={styles.rightText}>{rightText}</Text>
    </View>
 );
 
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
         borderRadius: 8, 
         paddingHorizontal: 10, 
         paddingVertical: 5, 
-        marginVertical: 8, 
+        marginVertical: 4, 
         width: '80%', 
         height: 40
     },

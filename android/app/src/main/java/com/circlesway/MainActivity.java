@@ -24,7 +24,7 @@ import android.util.Log;
 
 
 public class MainActivity extends ReactActivity {
-    private static final NOTIFICAITON_CHANNEL_ID = "circlesWay"
+    private static final String NOTIFICAITON_CHANNEL_ID = "circlesWay";
 
     /**
      * Returns the name of the main component registered from JavaScript. This is

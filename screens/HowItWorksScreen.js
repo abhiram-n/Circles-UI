@@ -9,62 +9,72 @@ import firebase from 'react-native-firebase';
 export default class HowItWorksScreen extends Component<Props>{
     constructor(props){
         super(props);
-        this.nextScreen = this.props.navigation.getParam("nextScreen", Constants.NONE);
-        this.visitType = this.props.navigation.getParam("visitType", Constants.NONE);
+        this.colorOnExit = this.props.navigation.getParam("colorOnExit", Constants.NONE);
         this.slides=[
             {
                 key: 'first',
-                backgroundColor: Constants.BACKGROUND_WHITE_COLOR, 
+                backgroundColor: Constants.APP_HOW_IT_WORKS_COLOR, 
                 text: "A Circle is a private space for 10 of your close friends and family with whom you're comfortable enough to share your credit and debit cards.",
                 title: "Your Circle",
                 imageStyle: styles.image,                
                 textStyle: styles.text,
                 titleStyle: styles.title,
+                image: require('../assets/resources/hiw_1.jpg'),
             },
             {
                 key: 'second',
-                backgroundColor: Constants.BACKGROUND_WHITE_COLOR,
+                backgroundColor: Constants.APP_HOW_IT_WORKS_COLOR,
                 text: "Figure out who has the card you're looking for either in your Circle or in your friends' Circles.",
-                title: "Discover Cards",
+                title: "Discover",
                 imageStyle: styles.image,                
                 textStyle: styles.text,
+                image: require('../assets/resources/hiw_2.jpg'),
                 titleStyle: styles.title,
             },
             {
                 key: 'third',
-                backgroundColor: Constants.BACKGROUND_WHITE_COLOR,
-                text: "Request friends in your Circle or acquaintances in your friends' Circles to share card details in an end-to-end encrypted chat.",
+                backgroundColor: Constants.APP_HOW_IT_WORKS_COLOR,
+                text: "Send requests to share card details in an end-to-end encrypted chat. No one else, not even Circles, can access the chat messages.",
                 title: "Request and Share",
                 imageStyle: styles.image,
                 textStyle: styles.text,
+                image: require('../assets/resources/hiw_3.jpg'),
                 titleStyle: styles.title
             },
         ]
     }
 
     componentWillMount(){
-        firebase.analytics().setCurrentScreen("HowItWorks");
+        firebase.analytics().setCurrentScreen("HowItWorks", "HowItWorksScreen");
         changeNavigationBarColor(Constants.APP_HOW_IT_WORKS_COLOR, false);
     }
 
     componentWillUnmount(){
-        changeNavigationBarColor(Constants.BRAND_BACKGROUND_COLOR, false)
+        if (this.colorOnExit != null && this.colorOnExit != Constants.NONE){
+            changeNavigationBarColor(this.colorOnExit, false)
+        }
     }
 
     _onDone = () => {
-        if (this.nextScreen == Constants.NONE)
-        {
             this.props.navigation.goBack();
-        }
-        else{
-            this.props.navigation.replace(this.nextScreen, {visitType: this.visitType});
-        }
     }
+
+    _renderDoneButton = () => {
+        return (
+          <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_THIN_FONT}}>Done</Text>
+        );
+      };
     
+    _renderNextButton = () => {
+        return (
+          <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_THIN_FONT}}>Next</Text>
+        );
+      };
+
     render()
     {
         return(
-              <AppIntroSlider slides={this.slides} onDone={this._onDone} />
+              <AppIntroSlider renderDoneButton={this._renderDoneButton} renderNextButton={this._renderNextButton} slides={this.slides} onDone={this._onDone} />
         )
     }
 }
@@ -81,9 +91,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
     },
+    buttonTextStyle:{
+        color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
+    },
     image:{
-        width: "70%",
-        height: "40%",
+        maxWidth: "70%",
+        maxHeight: "60%",
         borderWidth: 2,
         borderRadius: 8,
     },

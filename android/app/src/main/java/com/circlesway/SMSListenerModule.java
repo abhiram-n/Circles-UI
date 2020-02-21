@@ -45,10 +45,6 @@ public class SMSListenerModule extends ReactContextBaseJavaModule implements Lif
         // SMS message.
         SmsRetrieverClient client = SmsRetriever.getClient(smsContext);
 
-        // TODO: Delete below and the appsignature class
-        AppSignatureHelper a = new AppSignatureHelper(smsContext);
-        ArrayList<String> appcodes = a.getAppSignatures();
-        Log.d("Received", "HASH: " + appcodes.get(0));
         // Starts SmsRetriever, which waits for ONE matching SMS message until timeout
         // (5 minutes). The matching SMS message will be sent via a Broadcast Intent with
         // action SmsRetriever#SMS_RETRIEVED_ACTION.

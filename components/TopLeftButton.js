@@ -5,8 +5,8 @@ import { Button, Icon } from "native-base";
 import LinearGradient from "react-native-linear-gradient";
 import firebase from "react-native-firebase";
 
-const TopLeftButton = ({iconName, imgPath, color, onPress}) => (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+const TopLeftButton = ({iconName, imgPath, color, onPress, height}) => (
+    <TouchableOpacity style={[styles.container, {height: height ?? 70}]} onPress={onPress}>
         {iconName != null ? 
           <Icon name={iconName} type="FontAwesome5" style={{color: color, fontSize: 16}}/>
           : 
@@ -17,7 +17,6 @@ const TopLeftButton = ({iconName, imgPath, color, onPress}) => (
 
 const styles = StyleSheet.create({
       container:{
-        height: 70,
         width: 45,
         justifyContent: 'center',
         alignItems: 'center',

@@ -7,7 +7,7 @@ import firebase from "react-native-firebase";
 
 const RoundImageWithCaptionButton = ({caption, subtitle, isLarge, imgUri, onPress}) => (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-        <Image defaultSource={require('../assets/resources/default_user.png')} source={{uri: imgUri}} style={isLarge ? styles.circleLarge : styles.circleSmall} />
+        <Image  source={{uri: imgUri}} style={isLarge ? styles.circleLarge : styles.circleSmall} />
         {caption != null ?
           <Text numberOfLines={1} style={styles.caption}>{caption}</Text>
           :
@@ -55,6 +55,16 @@ const styles = StyleSheet.create({
         fontFamily: Constants.APP_BODY_FONT,
         textAlign: 'center',
         marginTop: 3
+      },
+      smallCircleSize:{
+        width: 80,
+        height: 80,
+        borderRadius: 40
+      },
+      largeCircleSize:{
+        width: 120,
+        height: 120, 
+        borderRadius: 60
       }
 });
 

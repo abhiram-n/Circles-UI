@@ -43,27 +43,44 @@ class SignUpScreen extends Component<Props> {
       showManualCodeEntry: false,
       imageUri: null,
       showPopup: false,
-      suppressPopup: false
+      suppressPopup: false,
+      showResend: false,
+      numResend: 0
     };
 
     this.eventEmitter = new NativeEventEmitter(SMSListener);
     this.cards = [];
     this.newListenerNeeded = true;
     this.profileImgUrl = "";
-    this.firebaseUID = "";
+    this.firebaseUID = "NA";
     this.inviteCode = this.props.navigation.getParam("inviteCode", Constants.NONE);
   }
 
   componentDidMount() {
-    // Get the device token
     this._isMounted = true;
+
+    // signin the user on firebase
+    firebase.auth().signInAnonymously()
+    .then((value)=>{
+      if (value == null || value.user == null || value.user.uid == null){
+        console.log('Auth returned null object. Cannot upload to Firebase');
+        return null;
+      }
+
+      this.firebaseUID = value.user.uid;
+    })
+    .catch((reason)=>{
+      console.log('Error with Firebase auth: ' + reason)
+    })
+
+    // Get the device token
     firebase.messaging().getToken()
-      .then(value => {
-        AuthHelpers.setDeviceToken(value);
-      })
-      .catch(reason => {
-        console.log("Error getting Firebase Token: " + reason);
-      });
+    .then(value => {
+      AuthHelpers.setDeviceToken(value);
+    })
+    .catch(reason => {
+      console.log("Error getting Firebase Token: " + reason);
+    });
 
     // Set the event listener to retrieve the SMS code
     this.eventEmitter.addListener(Constants.MESSAGE_RECEIVED_EVENT, (event) => {
@@ -85,7 +102,7 @@ class SignUpScreen extends Component<Props> {
   }
 
   async init() {
-    firebase.analytics().setCurrentScreen("SignUp");
+    firebase.analytics().setCurrentScreen("SignUp", "SignUpScreen");
 
     fetch(Constants.SERVER_ENDPOINT + REGULAR_CARDS_API, { method: "GET" })
       .then(response => {
@@ -151,16 +168,7 @@ class SignUpScreen extends Component<Props> {
     ImageResizer.createResizedImage(response.uri, (response.width/2), (response.height/2), "JPEG", 50, 0).then((result) => {
       this.setState({imageUri: result.uri});
       pathForUpload = result.path;
-      return firebase.auth().signInAnonymously();
-    })
-    .then((value)=>{
-      if (value == null || value.user == null || value.user.uid == null){
-        console.log('Auth returned null object. Cannot upload to Firebase');
-        return null;
-      }
-
-      this.firebaseUID = value.user.uid;
-      storageRef = firebase.storage().ref(Constants.FIREBASE_STORAGE_REF + value.user.uid + ".jpg");
+      storageRef = firebase.storage().ref(Constants.FIREBASE_STORAGE_REF + this.firebaseUID + ".jpg");
       return storageRef.putFile(pathForUpload);
     })
     .then((snapshot)=>{
@@ -178,6 +186,7 @@ class SignUpScreen extends Component<Props> {
   parseOTPAndVerify(smsMessage){
     codeFromSMS = smsMessage.substr(Constants.START_INDEX_OTP, Constants.VERIFICATION_CODE_LENGTH);
     this.setState({statusMessage: UIStrings.CODE_RECEIVED});
+    firebase.analytics().logEvent('AutoOTPVerification');
     this.verifyAuthCode(codeFromSMS);
   }
 
@@ -186,7 +195,15 @@ class SignUpScreen extends Component<Props> {
     return "+" + countryCode + this.state.phone
   }
 
-  async sendCodeToPhone(){
+  async sendCodeToPhone(isResend){
+    if (isResend && this.state.numResend >= Constants.MAX_RESEND_SMS_COUNT){
+      Utilities.showLongToast("Sorry, you have exceeded the resending limit for OTP.")
+      return null;
+    }
+    else if (isResend){
+      this.setState(prevState => ({numResend: prevState.numResend + 1}));
+    }
+
     // Start the SMS listener
     try{
       if (this.newListenerNeeded){
@@ -218,16 +235,18 @@ class SignUpScreen extends Component<Props> {
         }
 
         if (response.ok) {
-          this.setState({
-            statusMessage: this.state.canAutoVerify ? UIStrings.CODE_SENT_AUTO_VERIFY : UIStrings.CODE_SENT,
-            showManualCodeEntry: !this.state.canAutoVerify});
+          this.setState(prevState => ({
+            statusMessage: prevState.canAutoVerify ? UIStrings.CODE_SENT_AUTO_VERIFY : UIStrings.CODE_SENT,
+            showManualCodeEntry: isResend ? prevState.showManualCodeEntry : !prevState.canAutoVerify}));
 
             // If its been a while, then open the manual otp
-            setTimeout(()=>{
-              if(!this.state.showManualCodeEntry && this._isMounted){
-                this.setState({showManualCodeEntry: true, statusMessage: UIStrings.OPTIONALLY_ENTER_OTP})
-              }
-            }, Constants.DELAY_BEFORE_MANUAL_OTP)
+            if (!isResend){
+              setTimeout(()=>{
+                if(!this.state.showManualCodeEntry && this._isMounted){
+                  this.setState({showManualCodeEntry: true, statusMessage: UIStrings.OPTIONALLY_ENTER_OTP, showResend: true})
+                }
+              }, Constants.DELAY_BEFORE_MANUAL_OTP)
+            }
         }
         else if (response.status == Constants.PRECONDITION_FAILED_STATUS_CODE) {
           this.setState({statusMessage: UIStrings.PHONE_ALREADY_EXISTS, disableVerify: false})
@@ -314,13 +333,6 @@ class SignUpScreen extends Component<Props> {
     this.setState({phone: value, phoneSuccess: phoneSuccess && countryCodeSuccess});
   }
 
-  onChangeVerificationCodeInput(val){
-    if (val.length == Constants.VERIFICATION_CODE_LENGTH){
-      this.setState({disableVerify: true, statusMessage: UIStrings.VERIFYING_CODE});
-      this.verifyAuthCode(val);
-    }
-  }
-
   isNameLegitimate(value){
     name = value.toLowerCase();
     if (name.endsWith(" ")){
@@ -337,6 +349,7 @@ class SignUpScreen extends Component<Props> {
   onChangeManualOTP(val){
     if (val.length == Constants.VERIFICATION_CODE_LENGTH){
       this.setState({statusMessage: UIStrings.VERIFYING_CODE});
+      firebase.analytics().logEvent('ManualOTPVerification');
       this.verifyAuthCode(val);
     }
   }
@@ -375,74 +388,70 @@ class SignUpScreen extends Component<Props> {
         <Text style={styles.title}>{UIStrings.GREAT_WELCOME}</Text>
           <View style={{alignSelf: 'center'}}>
           {this.state.imageUri == null ? 
-            <RoundIconWithBackgroundAndCaptionButton isLight colors={Constants.DEFAULT_GRADIENT}  onPress={()=>this.showNotificationOrLaunchImagePicker()} 
-              isLarge={true} iconType="SimpleLineIcons" caption=" Add Photo" icon="camera" thinFont={true} />
+            <RoundIconWithBackgroundAndCaptionButton isLight thinFont colors={Constants.DEFAULT_GRADIENT}  onPress={()=>this.showNotificationOrLaunchImagePicker()} 
+              isLarge={true} iconType="SimpleLineIcons" caption={"Add Photo"} icon="camera" />
             :
             <RoundImageWithCaptionButton onPress={()=>this.showNotificationOrLaunchImagePicker()} isLarge={true} imgUri={this.state.imageUri}  />
           }
           </View>
           <InfoPopup makeExteriorTransparent lottieProps={{name: require("../assets/resources/image_suggestion.json")}} content={UIStrings.GREAT_PICTURES_CIRCLES}  
           isVisible={this.state.showPopup && !this.state.suppressPopup} onClose={()=>this.launchImagePicker()}  />
-         <InputGroup style={{marginTop: 25, marginBottom: 10}} iconRight error={!this.state.nameSuccess}>
+         <View style={{borderRadius: 10, marginTop: 25, marginBottom: 10, flexDirection: 'row', backgroundColor: Constants.INITIAL_SCREEN_TEXT_INPUT_COLOR}}>
             <Input
               placeholder={UIStrings.PLACEHOLDER_ENTER_NAME}
-              maxLength={Constants.PHONE_NUMBER_MAX_LENGTH}
+              maxLength={Constants.NAME_MAX_LENGTH}
               placeholderTextColor={ Constants.APP_PLACEHOLDER_TEXT_COLOR  }
-              style={{ fontSize: 17, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: "Montserrat-Light" }}
+              style={{paddingLeft: 8, width: '85%', fontSize: 17, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: "Montserrat-Light" }}
               onChangeText={val => this.onNameChange(val)} />
-              <Icon name={ this.state.nameSuccess ? Constants.ICON_CHECKMARK : null } style={styles.checkmark} />
-          </InputGroup>
-          
-          {/* Input for email  */}
-          {/* <InputGroup iconRight error={!this.state.emailSuccess}>
-            <Input
-              placeholder={UIStrings.PLACEHOLDER_EMAIL}
-              maxLength={Constants.EMAIL_MAX_LENGTH}
-              placeholderTextColor={ Constants.APP_PLACEHOLDER_TEXT_COLOR  }
-              style={{ marginBottom: 3, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: "Montserrat-Light" }}
-              onChangeText={val => this.onEmailChange(val)} />
-              <Icon name={ this.state.emailSuccess ? Constants.ICON_CHECKMARK : null } style={styles.checkmark} />
-          </InputGroup> */}
+              <Icon name={ this.state.nameSuccess ? Constants.ICON_CHECKMARK : null } style={[styles.checkmark, {width: '11%'}]} />
+          </View>
           
           {/* Input for country code and phone number */}
           <View style={{flexDirection:'row', marginBottom: 10}}>
-            <InputGroup style={{width: '20%', marginRight: 10}} error={!this.state.phoneSuccess}>
+            <View style={{width: '20%', marginRight: 10, borderWidth: 0}} >
               <TextInput
                 editable={!this.state.disableVerify}
                 defaultValue={this.state.countryCode} keyboardType="number-pad" onChangeText={val => this.onCountryCodeChange(val)}
                 maxLength={Constants.COUNTRY_CODE_MAX_LENGTH}
                 placeholderTextColor={ Constants.APP_PLACEHOLDER_TEXT_COLOR  }
-                style={{ fontSize: 17, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: "Montserrat-Light" }} />
-            </InputGroup>
-            <InputGroup style={{width: '78%'}} error={!this.state.phoneSuccess}>
-              <Input
-               editable={!this.state.disableVerify}
-               onChangeText={text=>this.onPhoneChange(text)} keyboardType="number-pad"
-               maxLength={Constants.PHONE_NUMBER_MAX_LENGTH}
-               placeholder={UIStrings.PLACEHOLDER_ENTER_PHONE}
-               placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
-               style={{fontSize: 17, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: "Montserrat-Light" }} />
-              <Icon name={ this.state.phoneSuccess ? Constants.ICON_CHECKMARK : null } style={styles.checkmark} />
-            </InputGroup>
+                style={{paddingHorizontal: 8, backgroundColor: Constants.INITIAL_SCREEN_TEXT_INPUT_COLOR, width: "100%", height: 50, borderRadius: 10, fontSize: 17, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: "Montserrat-Light" }} />
+            </View>
+            <View style={{backgroundColor: Constants.INITIAL_SCREEN_TEXT_INPUT_COLOR, borderRadius: 10, width: '76.5%', flexDirection: 'row', justifyContent: 'center'}} >
+                <TextInput
+                editable={!this.state.disableVerify}
+                onChangeText={text=>this.onPhoneChange(text)} keyboardType="number-pad"
+                maxLength={Constants.PHONE_NUMBER_MAX_LENGTH}
+                placeholder={UIStrings.PLACEHOLDER_ENTER_PHONE}
+                placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
+                style={{paddingLeft: 10, fontSize: 17, width: '80%', height: 50, borderRadius: 10, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: "Montserrat-Light" }} />
+                <Icon name={ this.state.phoneSuccess ? Constants.ICON_CHECKMARK : null } style={[styles.checkmark, {width: '12%'}]} />
+            </View>
           </View>
+
 
           {/* Manual Code Entry */}
           {this.state.showManualCodeEntry ? 
-          <View style={{flexDirection: 'row', marginTop: 20, marginBottom: 30}}>
+          <View style={{flexDirection: 'row', marginTop: 20, marginBottom: 30, alignSelf: 'center'}}>
             <Text style={styles.enterOTP}>{UIStrings.ENTER_OTP}</Text>
             <TextInput onChangeText={val=>this.onChangeManualOTP(val)} 
               keyboardType="number-pad" maxLength= {Constants.VERIFICATION_CODE_LENGTH}
-              style={{fontSize: 26, borderBottomColor: Constants.BRAND_BACKGROUND_COLOR, borderBottomWidth: 0.5, width: 170, padding: 5, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: Constants.APP_BODY_FONT}} />
+              style={{paddingHorizontal: 10, borderRadius: 10, fontSize: 17, backgroundColor: Constants.INITIAL_SCREEN_TEXT_INPUT_COLOR, width: 120, padding: 5, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: Constants.APP_BODY_FONT}} />
           </View>
-          : null }
+           : null  }
 
           {/* Status Notes */}
           <Text style={styles.status}>{this.state.statusMessage}</Text>
 
           {/* Bottom buttons */}
-          <View style={{marginTop: 30, flexDirection: 'row', justifyContent: 'center'}}>
-            <GradientButton isLarge isLight colors={Constants.DEFAULT_GRADIENT} title={this.state.disableVerify ? UIStrings.TITLE_VERIFYING : UIStrings.TITLE_VERIFY} 
-            onPress={()=>this.onNextPress()}  />
+          <View style={{marginTop: 30, flexDirection: 'column', justifyContent: 'center'}}>
+              <GradientButton isLarge isLight colors={Constants.DEFAULT_GRADIENT} title={this.state.disableVerify ? UIStrings.TITLE_VERIFYING : UIStrings.TITLE_VERIFY} 
+              onPress={()=>this.onNextPress()}  />
+              {
+                this.state.showResend ? 
+                <Text onPress={()=>this.sendCodeToPhone(true)} style={styles.resend}>{UIStrings.RESEND_CODE}</Text>
+                :
+                null
+              }
          </View>
        </ScrollView>
       </View>
@@ -497,7 +506,8 @@ const styles = StyleSheet.create({
   },
   checkmark: {
     color: "#00C497",
-    margin: 5
+    margin: 5,
+    alignSelf: 'center',
   },
   moreCards:{
     color: Constants.APP_TEXT_COLOR, 
@@ -521,12 +531,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   enterOTP:{
-    marginTop: 10,
+    marginTop: 4,
     marginRight: 15,
     textAlign: 'center',
     textAlignVertical: 'center',
     fontFamily: Constants.APP_THIN_FONT,
     color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
-    fontSize: 17
+    fontSize: 18
+  },
+  resend:{
+    marginTop: 5, 
+    textAlign: 'center', 
+    textDecorationLine: "underline",
+    fontSize: 14, 
+    fontFamily: Constants.APP_BODY_FONT, 
+    color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND
   }
 });

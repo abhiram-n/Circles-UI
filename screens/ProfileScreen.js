@@ -8,6 +8,7 @@ import * as AuthHelpers from '../helpers/AuthHelpers';
 import * as Utilities from '../helpers/Utilities';
 import CommonStyles from '../components/CommonStyles';
 import * as NavigationHelpers from '../helpers/NavigationHelpers';
+import * as VirgilEncryptionHelpers from '../helpers/VirgilEncryptionHelpers';
 import LinearGradient from 'react-native-linear-gradient';
 import firebase from 'react-native-firebase';
 import IconWithCaptionButton from '../components/IconWithCaptionButton'
@@ -48,12 +49,12 @@ export default class ProfileScreen extends Component<Props>{
 
     componentDidMount()
     {
-      this._isMounted = true;
+       this._isMounted = true;
        this.init();
     }
 
     async init(){
-        firebase.analytics().setCurrentScreen("Profile");
+        firebase.analytics().setCurrentScreen(this.userId == null ? "MyProfile" : "FriendProfile", "ProfileScreen");
         let headers = await AuthHelpers.getRequestHeaders();
         let apiEndpoint = this.userId == null ? Constants.SERVER_ENDPOINT + Constants.PROFILE_API :
                             Constants.SERVER_ENDPOINT + Constants.PROFILE_API + ID_SUFFIX + this.userId;
@@ -107,7 +108,7 @@ export default class ProfileScreen extends Component<Props>{
 
     onRequestPress(item){
       this.setState({ recipientName: this.state.name, selectedCardName: item.name, selectedCardId: item.id, showPopup: true,
-                    requestSubmitButtonColors: Constants.BUTTON_COLORS, requestSubmitButtonText: UIStrings.TITLE_SEND });
+                    requestSubmitButtonColors: Constants.BUTTON_COLORS, requestSubmitButtonText: UIStrings.TITLE_SEND, requestAmount: null });
     }
   
     async onRequestSubmit(){
@@ -133,6 +134,7 @@ export default class ProfileScreen extends Component<Props>{
           this.setState({requestSubmitButtonText: UIStrings.SENT, requestSubmitButtonColors: Constants.SUCCESS_COLORS})
           setTimeout(()=>{this.setState({showPopup: false})}, 1000);
           Utilities.showLongToast(UIStrings.REQUEST_SENT);
+          VirgilEncryptionHelpers.registerVirgilForUser(); // make sure user is registered on virgil
           return null;
         }
   
@@ -168,26 +170,23 @@ export default class ProfileScreen extends Component<Props>{
                   <View style={CommonStyles.popupContainer}>
                     <View style={CommonStyles.popup}>
                       <TopRightButton color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} iconName="times" onPress={()=>{this.setState({showPopup: false})}} height={50}/>
-                      <Icon name={Constants.CARD_REQUEST_ICON_NAME} type={Constants.CARD_REQUEST_ICON_TYPE} style={{padding: 10, alignSelf: 'center', fontSize: 100, color: Constants.APP_THEME_COLORS[0]}}/>
-                      <Text style={[CommonStyles.popupTitle, {marginBottom: 40}]}>{UIStrings.TITLE_NEW_REQUEST}</Text>
-                      <View style={{flexDirection:'row', justifyContent: 'space-between',marginBottom: 20, overflow: 'hidden'}}>
-                        <Text style={styles.arPopupTextName}>To:</Text>
-                        <Text numberOfLines={1} style={styles.arPopupTextValue}> {this.state.recipientName}  </Text>
-                      </View >
+                      <LottieView style={{alignSelf: 'center', width: '70%', height: 90}}  source={require("../assets/resources/unlock.json")} autoPlay loop />
+                      <Text numberOfLines={1} style={[CommonStyles.popupTitle, {marginBottom: 20}]}>{UIStrings.TITLE_NEW_REQUEST_TO}{Utilities.getFirstName(this.state.recipientName)}</Text>
+
                       <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 20, overflow: 'hidden'}}>
                         <Text style={styles.arPopupTextName}>{UIStrings.CARD_COLON}</Text>
-                        <Text numberOfLines={1} style={styles.arPopupTextValue}> {this.state.selectedCardName} </Text>
+                        <Text numberOfLines={2} style={styles.arPopupTextValue}>{this.state.selectedCardName}</Text>
                       </View>
-                      <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 20}}>
+                      <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 15}}>
                         <Text style={styles.arPopupTextName}>{UIStrings.AMOUNT_COLON}</Text>
-                        <TextInput onChangeText={(val)=>this.setState({requestAmount: val})} style={{marginLeft: 10, width: 150, alignSelf: 'center', borderWidth: 0.3, borderRadius: 8, borderColor: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }}
+                        <TextInput onChangeText={(val)=>this.setState({requestAmount: val})} style={styles.arInput}
                                   placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} placeholder={UIStrings.PLACEHOLDER_ENTER_AMOUNT}
                                   keyboardType="number-pad" />
                       </View>
-                      <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 20}}>
+                      <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 15}}>
                         <Text style={styles.arPopupTextName}>{UIStrings.WHAT_FOR_COLON}</Text>
                         <TextInput onChangeText={(val)=>this.setState({shortDescription: val})} 
-                                  style={{marginLeft: 10, width: 150, alignSelf: 'center', borderWidth: 0.3, borderRadius: 8, borderColor: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }}
+                                  style={styles.arInput}
                                   placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} 
                                   maxLength={Constants.SHORT_DESCRIPTION_MAX_LENGTH}
                                   placeholder={UIStrings.PLACEHOLDER_SHORT_DESCRIPTION} />
@@ -201,7 +200,7 @@ export default class ProfileScreen extends Component<Props>{
              {/* Banner with Image */}
              <View style={{ position: "absolute", top: 0, height: Constants.SMALL_BANNER_HEIGHT, width: "100%"}}>
               <LinearGradient colors={Constants.APP_THEME_COLORS} style={{width: '100%', height: '100%'}} >
-                <Image defaultSource={require('../assets/resources/default_user.png')} resizeMethod="resize" source={{uri: this.state.imageUri}} style={{backgroundColor: Constants.IMAGE_DEFAULT_BKGD_COLOR, alignSelf: 'center', marginTop: '11%', width:110, height: 110, borderRadius: 55, overflow: 'hidden'}}/>
+                <Image resizeMethod="resize" source={{uri: this.state.imageUri}} style={{backgroundColor: Constants.IMAGE_DEFAULT_BKGD_COLOR, alignSelf: 'center', marginTop: '11%', width:110, height: 110, borderRadius: 55, overflow: 'hidden'}}/>
               </LinearGradient>
              </View>
 
@@ -213,12 +212,12 @@ export default class ProfileScreen extends Component<Props>{
                       source={require("../assets/resources/loading.json")} autoPlay loop />
                     :
                     null}
-                  <View style={{flexDirection: 'row', padding: 10}}>
+                  <View style={{flexDirection: 'row', padding: 10, paddingVertical: 8}}>
                       <Icon name="user" type="FontAwesome5" style={styles.icon} />
                       <Text numberOfLines={1} style={styles.infoTitle}>{this.state.name}</Text>
                   </View>
                   <View style={styles.line} />
-                  <View style={{flexDirection: 'row', padding: 10}}>
+                  <View style={{flexDirection: 'row', padding: 10, paddingVertical: 8}}>
                       <Icon name="phone" type="FontAwesome" style={styles.icon} />
                       <Text style={styles.infoTitle}>{this.state.phoneNumber}</Text>
                   </View>
@@ -227,27 +226,36 @@ export default class ProfileScreen extends Component<Props>{
                   {/* Show the cards */}
                   {
                     this.state.showNoCardsOnProfile ? 
-                      <Text style={[styles.infoTitle, {padding: 10, textAlign: 'center'}]}>{UIStrings.NO_CARDS_ON_PROFILE}</Text>
-                      :
-                      <View>
-                        {this.userId == null ?
-                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                          <Text style={{paddingLeft: '5%', fontFamily: Constants.APP_BODY_FONT, fontSize: 12, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.CARDS_COLON}{this.state.cards.length}</Text>
-                          <Icon onPress={()=>this.editCards()} name="edit" type="FontAwesome" style={{paddingRight: '5%', textAlign: 'right', fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}/>
-                        </View>
-                          : 
+                      <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+                        <Text style={[styles.infoTitle, {padding: 10, textAlign: 'center'}]}>{UIStrings.NO_CARDS_ON_PROFILE}</Text>
+                        {
+                          this.userId == null ? 
+                          <Icon onPress={()=>this.editCards()} name="edit" type="FontAwesome" style={{textAlignVertical: 'center', paddingRight: '5%',  fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}/>
+                          :
                           null
                         }
+                      </View>
+                      :
+                      <View>
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                          <Text style={{paddingLeft: '5%', fontFamily: Constants.APP_BODY_FONT, fontSize: 12, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.CARDS_COLON}{this.state.cards.length}</Text>
+                          {
+                            this.userId == null ?
+                            <Icon onPress={()=>this.editCards()} name="edit" type="FontAwesome" style={{paddingRight: '5%', textAlign: 'right', fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}/>
+                            :
+                            null
+                          }
+                        </View>
                         {
                           this.userId == null ?
                           <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 10}} horizontal={true} data={this.state.cards} 
                           renderItem={({ item })=> (
-                                      <CreditCardWithText name={this.state.name} title={item.name} colors={Utilities.getColorForCard(item.id)} />
+                                      <CreditCardWithText name={this.state.name} title={item.name} imgName={Utilities.getCardTemplateForCard(item.id)} />
                                   )} />
                           :
                           <FlatList showsHorizontalScrollIndicator={false} style={{marginTop: 20}} horizontal={true} data={this.state.cards} 
                           renderItem={({ item })=> (
-                                        <CreditCardWithButton title={item.name} colors={Utilities.getColorForCard(item.id)}
+                                        <CreditCardWithButton title={item.name} imgName={Utilities.getCardTemplateForCard(item.id)}
                                         leftButtonParams={{caption: UIStrings.REQUEST, icon: Constants.CARD_REQUEST_ICON_NAME, type: Constants.CARD_REQUEST_ICON_TYPE, onPress: ()=> this.onRequestPress(item)}} 
                                         rightButtonParams={{caption: UIStrings.CALL, icon: "phone", onPress: ()=> Utilities.goToDialScreen(this.state.phoneNumber)}} />
                                     )} />
@@ -260,12 +268,11 @@ export default class ProfileScreen extends Component<Props>{
              </View>
 
             {/* Bottom menu */}
-            <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 100, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+            <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 100, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
             </View>
 
             </View>
@@ -288,7 +295,7 @@ const styles = StyleSheet.create({
       fontFamily: 'Montserrat-Regular', 
       textAlign: "center"
     },
-      cardsList:{
+    cardsList:{
         width: 300, 
         height: 150, 
         alignSelf: 'center', 
@@ -300,7 +307,7 @@ const styles = StyleSheet.create({
     },
     line:{
       borderBottomWidth: 1, 
-      marginVertical: 8, 
+      marginVertical: 6, 
       borderColor: Constants.BACKGROUND_GREY_COLOR, 
       width: '90%', 
       alignSelf: 'center'
@@ -322,8 +329,9 @@ const styles = StyleSheet.create({
     },
     arPopupTextValue:{
       fontFamily: Constants.APP_BODY_FONT, 
-      fontSize: 15,
-      textAlign: 'center',
+      fontSize: 14,
+      textAlign: 'left',
+      width: 180,
       color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
     },
     arPopupTextName:{
@@ -332,5 +340,16 @@ const styles = StyleSheet.create({
       textAlign: 'center',
       textAlignVertical: 'center',
       color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
+    },
+    arInput:{
+      backgroundColor: Constants.BACKGROUND_GREY_COLOR, 
+      height: 40, 
+      marginLeft: 10, 
+      width: 180, 
+      alignSelf: 'center', 
+      borderRadius: 8, 
+      fontSize: 14, 
+      color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, 
+      fontFamily: "Montserrat-Light" 
     }
 });

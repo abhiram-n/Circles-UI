@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Clipboard, Platform, StyleSheet, Text, Linking, View, Modal, PermissionsAndroid, TouchableOpacity, Image} from 'react-native';
-import { Picker, TextInput, StatusBar } from 'react-native';
+import { Picker, TextInput, Keyboard, StatusBar } from 'react-native';
 import {Button, Fab, Icon} from 'native-base';
 import {createStackNavigator, createAppContainer, FlatList} from 'react-navigation';
 import firebase from 'react-native-firebase';
@@ -46,7 +46,7 @@ export default class AddToCircleScreen extends Component<Props>{
 
     componentDidMount(){
         this._isMounted = true;
-        firebase.analytics().setCurrentScreen("AddToCircle");
+        firebase.analytics().setCurrentScreen("AddToCircle", "AddToCircleScreen");
         this.getUserIdCode();
     }
 
@@ -105,6 +105,7 @@ export default class AddToCircleScreen extends Component<Props>{
             return null;
         }
 
+        Keyboard.dismiss();
         this.setState({showNoUserFound: false, showResult: false, friendId: null, friendName: null, friendImgUrl: null, searching: true});
         fetch(Constants.SERVER_ENDPOINT + SEARCH_USER_API + code, {
             method: Constants.GET_METHOD,
@@ -178,7 +179,7 @@ export default class AddToCircleScreen extends Component<Props>{
         if (response.ok){
           this.setState({requestSubmitButtonText: UIStrings.SENT, requestSubmitButtonColors: Constants.SUCCESS_COLORS});
           setTimeout(()=>{this.setState({showPopup: false})}, 1000);
-          Utilities.showLongToast(UIStrings.REQUEST_SENT);
+          Utilities.showLongToast(UIStrings.INVITE_SENT);
           return null;
         }
 
@@ -261,9 +262,9 @@ export default class AddToCircleScreen extends Component<Props>{
                   {/* <Icon name="users" type="FontAwesome5" style={{padding: 10, alignSelf: 'center', fontSize: 100, color: Constants.APP_THEME_COLORS[0]}}/> */}
                   <LottieView style={{alignSelf: 'center', width: '70%', height: 100, marginHorizontal: 10}} 
                   source={require("../assets/resources/send_req.json")} autoPlay loop />
-                  <Text style={CommonStyles.popupTitle}>{UIStrings.ADD_TO_CIRCLE}</Text>
+                  <Text style={CommonStyles.popupTitle}>{UIStrings.SEND_REQUEST_QUESTION}</Text>
                   <Text style={[CommonStyles.popupText, {fontSize: 13}]}>
-                    {UIStrings.SEND_CIRCLE_REQUEST_CONFIRMATION.replace('%', this.state.friendName)}
+                    {UIStrings.SEND_CIRCLE_REQUEST_CONFIRMATION}
                   </Text>
                   <View style={{marginBottom: 30}} />
                   <GradientButton colors={this.state.requestSubmitButtonColors} onPress={()=>this.sendFriendRequest(this.state.friendId)} title={this.state.requestSubmitButtonText} />
@@ -278,9 +279,12 @@ export default class AddToCircleScreen extends Component<Props>{
                 <Text style={[styles.inviteLine1, {color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}]}>{UIStrings.SEARCH_FRIENDS}</Text>
                                 
                 <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 10}}>
-                    <TextInput autoCapitalize="characters" placeholder={UIStrings.ENTER_FRIENDS_CODE} placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} 
+                    <TextInput autoCapitalize="characters" placeholder={UIStrings.ENTER_FRIENDS_CODE} placeholderTextColor={"#ecdcff"} 
                                style={styles.input} onChangeText={(val)=>this.setState({searchInput: val})}/>
-                    <Text onPress={()=>this.searchWithIdCode()} style={{paddingLeft: 7, fontFamily: Constants.APP_TITLE_FONT,textAlignVertical: 'center', color: Constants.BRAND_BACKGROUND_COLOR, fontSize: 15}}>Go</Text>
+                    {/* <Text onPress={()=>this.searchWithIdCode()} style={{paddingLeft: 7, fontFamily: Constants.APP_TITLE_FONT,textAlignVertical: 'center', color: Constants.BRAND_BACKGROUND_COLOR, fontSize: 15}}>Go</Text> */}
+                    <TouchableOpacity onPress={()=>this.searchWithIdCode()} style={{justifyContent: 'center', height: 55, backgroundColor: Constants.APP_THEME_COLORS[1], borderTopRightRadius: 10, borderBottomRightRadius: 10, width: 50}} >
+                        <LottieView source={require('../assets/resources/search_glass.json')} autoPlay loop style={{alignSelf: 'center', width: 40, height: 40}} />
+                    </TouchableOpacity>
                 </View>
                 {
                     this.state.numFriends < Constants.MAX_NUMBER_IN_CIRCLE ?
@@ -316,12 +320,11 @@ export default class AddToCircleScreen extends Component<Props>{
              </View>
 
               {/* Bottom menu */}
-              <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+              <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
               </View>               
              </View>
         );
@@ -365,13 +368,14 @@ const styles = StyleSheet.create({
     input:{
         padding: 12,
         fontSize: 16,
+        height: 55,
         width: '90%', 
-        color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
+        color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
         fontFamily: Constants.APP_BODY_FONT,
         alignSelf: 'flex-start',
-        backgroundColor: Constants.BACKGROUND_WHITE_COLOR,
-        borderRadius: 20,
-        elevation: 10 
+        backgroundColor: Constants.APP_THEME_COLORS[1],
+        borderTopLeftRadius: 10,
+        borderBottomLeftRadius: 10,
     },
     circleCount:{
         textAlign: 'center', 

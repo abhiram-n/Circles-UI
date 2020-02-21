@@ -7,10 +7,9 @@ import firebase from "react-native-firebase";
 import RoundIconWithBackgroundAndCaptionButton from "./RoundIconWithBackgroundAndCaptionButton"
 import TextTicker from "react-native-text-ticker"
 
-const CreditCardWithButton = ({colors, size, title, subtitle, leftButtonParams, rightButtonParams }) => (
+const CreditCardWithButton = ({size, imgName, title, subtitle, leftButtonParams, rightButtonParams }) => (
     <View style={styles.container}>
-        <ImageBackground source={require("../assets/resources/new_card_2.png")}  style={{width: "100%", height: "100%", flex: 1}}>
-        {/* <LinearGradient colors={colors} style={styles.gradient}> */}
+        <ImageBackground source={imgName}  style={{width: "100%", height: "100%", flex: 1}}>
             <View style={styles.titleContainer}>
                 <View style={{alignContent: 'center', alignSelf: 'center', paddingHorizontal: '8%', paddingTop: 15}}>
                     <TextTicker  style={styles.title} loop bounce duration={5000} repeatSpacer={50} marqueeDelay={1000}>{title}</TextTicker>
@@ -27,7 +26,6 @@ const CreditCardWithButton = ({colors, size, title, subtitle, leftButtonParams, 
                     <Text style={styles.buttonText}>{rightButtonParams.caption}</Text>
                 </TouchableOpacity>
             </View>
-        {/* </LinearGradient> */}
         </ImageBackground>
    </View>
 )

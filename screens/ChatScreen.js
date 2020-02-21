@@ -44,8 +44,7 @@ export default class ChatScreen extends Component{
       messages: [
         {
           _id: 1,
-          text:
-            "You can share details here. All messages are end-to-end encrypted.",
+          text: UIStrings.CHAT_SYSTEM_MESSAGE,
           createdAt: new Date(),
           system: true
         }
@@ -116,58 +115,17 @@ export default class ChatScreen extends Component{
           }
         },
         rejected => {
-            console.error("Error while creating chat: " + rejected);
+            console.error("Error while creating chat: " + JSON.stringify(rejected));
         }
       ).catch((reason) => {
         console.log("TRANSACTION ERROR: " + reason)
       })
   }
 
-
-  // createChatIfNew() {
-  //   firebase.database().ref("/chats/" + this.chatKey)
-  //   .transaction(snapshot => {
-  //     if (snapshot == null) {
-  //         // Chat doesn't exist so create one.
-  //         let users = {};
-  //         users[this.partnerPhoneNumber] = true;
-  //         users[this.myPhoneNumber] = true;
-
-  //         return {
-  //           created: new Date().toISOString(),
-  //           users: users,
-  //           created_by: this.myPhoneNumber
-  //         };
-  //       } else {
-  //         return;
-  //       }
-  //     }
-  //     ,()=>{})
-  //     .then(
-  //       fulfilledValue => {
-  //         if (!fulfilledValue.committed) {
-  //           // Chat already exists
-  //         } else {
-  //           this.setupMessagesAndUsers();
-  //         }
-
-  //         this.listenForMessages();
-  //         this.setState({loading: false});
-  //       },
-  //       rejected => {
-  //           this.setState({loading: false});
-  //           console.error("Error while creating chat: " + rejected);
-  //       }
-  //     ).catch((reason) => {
-  //       this.setState({loading: false});
-  //       console.log("TRANSACTION ERROR: " + reason)
-  //     })
-  // }
-
-
   listenForMessages() {
-    firebase.database().ref("messages/" + this.chatKey + "/").on("child_added", async (snapshot) =>  {
-        let newMessage = {
+    tenMinsBack = (new Date()).getTime() - 600000;
+    firebase.database().ref("messages/" + this.chatKey + "/").orderByChild('timestamp').startAt(tenMinsBack).on("child_added", async (snapshot) =>  {
+      let newMessage = {
           _id: snapshot.key,
           text: await this.decryptMessage(snapshot.val().text, snapshot.val().sent_by),
           createdAt: snapshot.val().created,
@@ -179,7 +137,7 @@ export default class ChatScreen extends Component{
         };
 
         newMessages = [...this.state.messages, newMessage];
-        if (this.state.messages.length > 2){
+        if (this.state.messages.length >= 2){
           newMessages.sort((a, b)=> { return new Date(b.createdAt) - new Date(a.createdAt)})
         }
 
@@ -196,7 +154,7 @@ export default class ChatScreen extends Component{
   }
 
   componentDidMount() {
-    firebase.analytics().setCurrentScreen("Chat");
+    firebase.analytics().setCurrentScreen("Chat", "ChatScreen");
     AuthHelpers.getTokenIdPhone().then((result)=>{
       this.myFCMToken = result[0][1];
       this.myId = result[1][1];
@@ -204,12 +162,13 @@ export default class ChatScreen extends Component{
     })
 
     if (this.virgilUser == null){
-      VirgilEncryptionHelpers.initializeVirgilForUser()
+      VirgilEncryptionHelpers.getVirgilUser()
       .then((virgilUser)=>{
         this.virgilUser = virgilUser;
 
         if (this.virgilUser == null){
           Utilities.showLongToast(UIStrings.FAILED_TO_CREATE_CHAT);
+          this.goBackorGoHome();
           return;
         }
 
@@ -221,10 +180,19 @@ export default class ChatScreen extends Component{
       })
       .catch(err=>{
         Utilities.showLongToast(UIStrings.FAILED_TO_CREATE_CHAT);
-        NavigationHelpers.clearStackAndNavigate('UserHome');
+        this.goBackorGoHome();
       })
     }
 
+  }
+
+  goBackorGoHome(){
+    if (this.props.navigation.dangerouslyGetParent().state.index > 0){
+      this.props.navigation.goBack();
+    }
+    else{
+      NavigationHelpers.clearStackAndNavigate('UserHome');
+    }
   }
 
   componentWillUnmount() {
@@ -256,11 +224,10 @@ export default class ChatScreen extends Component{
     }
 
     if (this.partnerPublicKey == null){
-      partnerIds = [this.partnerId.toString()]
-      this.partnerPublicKey = await this.virgilUser.findUsers(partnerIds);
+      this.partnerPublicKey = await this.virgilUser.findUsers(identity=this.partnerId.toString()).catch((err)=>{ console.log('Find users for encryption ERROR: ' + err);  return null})
     }
 
-    encrypted = await this.virgilUser.encrypt(text, this.partnerPublicKey);
+    encrypted = await this.virgilUser.encrypt(message=text, publicKey=this.partnerPublicKey).catch((err)=>{ console.log('Encrypt failed. ERROR: ' + err);  return null});
     return encrypted;
   }
 
@@ -270,14 +237,14 @@ export default class ChatScreen extends Component{
     }
 
       if (sentBy == this.myPhoneNumber){
-        return await this.virgilUser.decrypt(text).catch((err)=>{ return "Message Expired"})
+        return await this.virgilUser.decrypt(text).catch((err)=>{ console.log('Decrypt own failed. ERROR: ' + err); return UIStrings.UNABLE_TO_DECRYPT})
       }
 
       if (this.partnerPublicKey == null){
-        this.partnerPublicKey = await this.virgilUser.findUsers(identity=this.partnerId.toString()).catch((err)=>{ return "Message Expired"})
+        this.partnerPublicKey = await this.virgilUser.findUsers(identity=this.partnerId.toString()).catch((err)=>{ console.log('Find Users for decryption ERROR: ' + err);  return UIStrings.UNABLE_TO_DECRYPT})
       }
 
-      return await this.virgilUser.decrypt(text, this.partnerPublicKey).catch((err)=>{ return "Message Expired"})
+      return await this.virgilUser.decrypt(message=text, senderPublicKey=this.partnerPublicKey).catch((err)=>{ console.log('Decrypt failed. ERROR: ' + err); return UIStrings.UNABLE_TO_DECRYPT})
   }
 
   async send(messages:Object) {
@@ -292,19 +259,32 @@ export default class ChatScreen extends Component{
       this.messagesReference = firebase.database().ref("messages/" + this.chatKey);
     }
 
+    messageSent = false;
     for (let i = 0; i < messages.length; i++) {
-      this.messagesReference.push({
-          text: await this.encryptMessage(messages[i].text),
+      newDate = new Date()
+      messageText = await this.encryptMessage(messages[i].text);
+      if (messageText != null){
+        this.messagesReference.push({
+          text: messageText,
           sent_by: this.myPhoneNumber,
-          created: new Date(),
+          created: newDate,
+          timestamp: newDate.getTime(),
           image: messages[i].image
         })
         .catch(error => {
           console.log("Error updating the list of messages: " + error);
         });
+
+        messageSent = true;
+      }
+      else{
+        Utilities.showLongToast(UIStrings.COULD_NOT_SEND_MESSAGE);
+      }
     }
 
-    this.sendNotification();
+    if (messageSent){
+      this.sendNotification();
+    }
   }
 
   onTypedTextChange(newText){
@@ -354,12 +334,12 @@ export default class ChatScreen extends Component{
       <TopLeftButton color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} iconName="home" onPress={()=>this.props.navigation.navigate('UserHome')} />
       <View style={{ flexDirection: 'column', position: "absolute", top: 0, height: "28%", width: "100%"}}>
         <LinearGradient colors={Constants.BUTTON_COLORS} style={{justifyContent: "center", flexDirection: 'column', width: '100%', height: '100%'}}>
-          <Image defaultSource={require('../assets/resources/default_user.png')} source={{uri: this.partnerImgUrl}} style={{backgroundColor: Constants.IMAGE_DEFAULT_BKGD_COLOR,width: 50, height: 50, borderRadius: 25, alignSelf: 'center'}}  resizeMethod="resize"/>
+          <Image source={{uri: this.partnerImgUrl}} style={{backgroundColor: Constants.IMAGE_DEFAULT_BKGD_COLOR,width: 50, height: 50, borderRadius: 25, alignSelf: 'center'}}  resizeMethod="resize"/>
           {
             this.state.loading ? 
               <Text numberOfLines={1} style={{marginBottom: 15, fontFamily: Constants.APP_BODY_FONT, fontSize: 16, color: Constants.APP_LOADING_COLOR, textAlign: 'center', paddingVertical: 10, paddingHorizontal: 5}}>{UIStrings.SETTING_UP_YOUR_CHAT}</Text>
               :
-              <Text numberOfLines={1} style={{marginBottom: 15, fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 16, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, textAlign: 'center', paddingVertical: 10, paddingHorizontal: 5}}>Chat with {this.partnerName}</Text>
+              <Text numberOfLines={1} style={{marginBottom: 15, fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 16, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, textAlign: 'center', paddingVertical: 10, paddingHorizontal: 5}}>Share with {this.partnerName}</Text>
           }
         </LinearGradient>
       </View>

@@ -11,6 +11,7 @@ import * as Utilities from '../helpers/Utilities';
 import * as UIStrings from '../helpers/UIStrings';
 import * as AuthHelpers from '../helpers/AuthHelpers';
 import * as NavigationHelpers from '../helpers/NavigationHelpers';
+import * as VirgilEncryptionHelpers from '../helpers/VirgilEncryptionHelpers';
 import CommonStyles from '../components/CommonStyles';
 import LogInScreen from './LogInScreen';
 import LinearGradient from 'react-native-linear-gradient';
@@ -50,7 +51,8 @@ class SearchCardScreen extends Component
       shortDescription: null,
       showPopup: false,
       requestSubmitButtonText: UIStrings.TITLE_SEND,
-      requestSubmitButtonColors: Constants.BUTTON_COLORS
+      requestSubmitButtonColors: Constants.BUTTON_COLORS,
+      mutualFriendName: null 
     };
 
     this.myPhoneNumber = AuthHelpers.getPhoneNumber();
@@ -61,7 +63,7 @@ class SearchCardScreen extends Component
     this._isMounted = true;
     this.setState({loading: true});
     
-    firebase.analytics().setCurrentScreen("Search");
+    firebase.analytics().setCurrentScreen("Search", "SearchCardScreen");
     fetch(Constants.SERVER_ENDPOINT + GET_ALL_CARDS_API, { method: 'GET' })
     .then((response) => {
       if (!this._isMounted){return null;}
@@ -116,10 +118,6 @@ class SearchCardScreen extends Component
     })
     .then((responseJson) => {
       if (responseJson != null){
-        if (responseJson.numFirst == 0 && responseJson.numSecond == 0){
-          firebase.analytics().logEvent("SearchZero", {card: item.name});
-        }
-
         cardholdersInCircle = responseJson.first.map(item => {
           return { name: item.name, id: item.id, key: item.id.toString(), phoneNumber: item.phoneNumber, cardId: item.cardId, cardName: item.cardName };
         });
@@ -135,24 +133,24 @@ class SearchCardScreen extends Component
           cardholdersOutsideCircle: cardholdersOutsideCircle,
         })
 
-        firebase.analytics().logEvent("Search", {card: item.name, found: responseJson.users, phoneNum: this.myPhoneNumber});
+        firebase.analytics().logEvent("Search", {card: item.name, first: responseJson.numFirst, second: responseJson.numSecond});
       }
     })
     .catch((error) => { 
       console.log('The error message for searchCardholders is: ' + error); 
       if (!this._isMounted) {return null;}
-      firebase.analytics().logEvent("Search", {card: item.name, found: "error", phoneNum: this.myPhoneNumber});
       Utilities.showLongToast(UIStrings.ERROR_SEARCHING_CARDHOLDERS);
     })
   }
 
-  onRequestPress(item){
-    this.setState({ recipientName: item.name, recipientId: item.id, showPopup: true, selectedCardId: item.cardId, 
-      selectedCardName: item.cardName, requestSubmitButtonText: UIStrings.TITLE_SEND, requestSubmitButtonColors: Constants.BUTTON_COLORS });
+  onRequestPress(item, friendName){
+    this.setState({ recipientName: item.name, recipientId: item.id, showPopup: true, selectedCardId: item.cardId, requestAmount: null,
+      selectedCardName: item.cardName, requestSubmitButtonText: UIStrings.TITLE_SEND, requestSubmitButtonColors: Constants.BUTTON_COLORS,
+      mutualFriendName: friendName ?? null });
   }
 
   async onRequestSubmit(){
-    const {recipientId, requestAmount, selectedCardId, shortDescription } = this.state
+    const {recipientId, requestAmount, selectedCardId, shortDescription, mutualFriendName } = this.state
     if (requestAmount < 1){
       Utilities.showLongToast(UIStrings.ENTER_VALID_AMOUNT);
       return;
@@ -162,7 +160,7 @@ class SearchCardScreen extends Component
     fetch(Constants.SERVER_ENDPOINT + NEW_ACCESS_REQUEST_API, 
       {
         method: Constants.POST_METHOD, 
-        body: JSON.stringify({ to: recipientId, cardId: selectedCardId, amount: requestAmount, shortDesc: shortDescription }),
+        body: JSON.stringify({ to: recipientId, cardId: selectedCardId, amount: requestAmount, shortDesc: shortDescription, mutualFriendName: mutualFriendName }),
         headers: await AuthHelpers.getRequestHeaders()
       })
     .then((response)=>{
@@ -174,6 +172,7 @@ class SearchCardScreen extends Component
         this.setState({requestSubmitButtonText: UIStrings.SENT, requestSubmitButtonColors: Constants.SUCCESS_COLORS})
         setTimeout(()=>{this.setState({showPopup: false})}, 1000);
         Utilities.showLongToast(UIStrings.REQUEST_SENT);
+        VirgilEncryptionHelpers.registerVirgilForUser(); // make sure user is registered on virgil
         return null;
       }
 
@@ -214,26 +213,26 @@ class SearchCardScreen extends Component
               <View style={CommonStyles.popupContainer}>
                 <View style={CommonStyles.popup}>
                   <TopRightButton height={50} color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} iconName="times" onPress={()=>{this.setState({showPopup: false})}} />
-                  <Icon name={Constants.CARD_REQUEST_ICON_NAME} type={Constants.CARD_REQUEST_ICON_TYPE} style={{padding: 10, alignSelf: 'center', fontSize: 100, color: Constants.APP_THEME_COLORS[0]}}/>
-                  <Text style={[CommonStyles.popupTitle, {marginBottom: 20}]}>{UIStrings.TITLE_NEW_REQUEST}</Text>
-                  <Text style={styles.arPopupTextName}>To:</Text>
-                  <Text numberOfLines={1} style={styles.arPopupTextValue}> {this.state.recipientName} </Text>
-                  <Text style={styles.arPopupTextName}>{UIStrings.CARD_COLON}</Text>
-                  <Text numberOfLines={1} style={styles.arPopupTextValue}> {this.state.selectedCardName} </Text>
-                  <Text style={styles.arPopupTextName}>{UIStrings.AMOUNT_COLON}</Text>
-                  <TextInput onChangeText={(val)=>this.setState({requestAmount: val})} style={{width: 150, alignSelf: 'center', borderWidth: 0.3, borderRadius: 8, borderColor: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, marginBottom: 20, fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }}
-                            placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
-                            placeholder={UIStrings.PLACEHOLDER_REQUEST_AMOUNT}
-                            keyboardType="number-pad" />
-                  <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 20}}>
+                  <LottieView style={{alignSelf: 'center', width: '70%', height: 90}}  source={require("../assets/resources/unlock.json")} autoPlay loop />
+                  <Text numberOfLines={1} style={[CommonStyles.popupTitle, {marginBottom: 20}]}>{UIStrings.TITLE_NEW_REQUEST_TO}{Utilities.getFirstName(this.state.recipientName)}</Text>
+                  <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 20, overflow: 'hidden'}}>
+                        <Text style={styles.arPopupTextName}>{UIStrings.CARD_COLON}</Text>
+                        <Text numberOfLines={2} style={styles.arPopupTextValue}>{this.state.selectedCardName} </Text>
+                  </View>
+                  <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 15}}>
+                        <Text style={styles.arPopupTextName}>{UIStrings.AMOUNT_COLON}</Text>
+                        <TextInput onChangeText={(val)=>this.setState({requestAmount: val})} style={styles.arInput}
+                                  placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} placeholder={UIStrings.PLACEHOLDER_ENTER_AMOUNT}
+                                  keyboardType="number-pad" />
+                  </View>
+                  <View style={{flexDirection:'row', justifyContent: 'space-between', marginBottom: 15}}>
                         <Text style={styles.arPopupTextName}>{UIStrings.WHAT_FOR_COLON}</Text>
                         <TextInput onChangeText={(val)=>this.setState({shortDescription: val})} 
-                                  style={{marginLeft: 10, width: 150, alignSelf: 'center', borderWidth: 0.3, borderRadius: 8, borderColor: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: "Montserrat-Light" }}
+                                  style={styles.arInput}
                                   placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR} 
                                   maxLength={Constants.SHORT_DESCRIPTION_MAX_LENGTH}
                                   placeholder={UIStrings.PLACEHOLDER_SHORT_DESCRIPTION} />
                   </View>
-
                   <GradientButton colors={this.state.requestSubmitButtonColors} onPress={()=>this.onRequestSubmit()} title={this.state.requestSubmitButtonText} />
                 </View>
                 </View>
@@ -241,12 +240,12 @@ class SearchCardScreen extends Component
         }
 
         {/* The title */}
-        <View style={{ height: "10%", flexDirection: 'row', justifyContent: 'center', alignContent: 'center', backgroundColor: Constants.BACKGROUND_GREY_COLOR}}>
+        <View style={{ height: "12%", flexDirection: 'row', justifyContent: 'center', alignContent: 'center', backgroundColor: Constants.BACKGROUND_GREY_COLOR}}>
           <Text style={{fontFamily: Constants.APP_TITLE_FONT, fontSize: 18, textAlignVertical:'center', textAlign: 'center', color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.FIND_CARD}</Text>
         </View>
 
         {/* Search input dropdown and results */}
-        <View  style={{flex:1, height: "90%", backgroundColor: Constants.BACKGROUND_WHITE_COLOR, borderTopLeftRadius: 50, borderTopRightRadius: 50, marginBottom: 60}}>
+        <View  style={{flex:1, height: "88%", backgroundColor: Constants.BACKGROUND_WHITE_COLOR, borderTopLeftRadius: 50, borderTopRightRadius: 50, marginBottom: 60}}>
           <Text style={{fontSize: 12, fontFamily: Constants.APP_BODY_FONT, padding: 5, marginTop: 22, color: Constants.BRAND_BACKGROUND_COLOR, textAlign: 'center'}}>{UIStrings.SEARCH_EXPLAINER}</Text>
               <SearchableDropdown
                   placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
@@ -296,7 +295,7 @@ class SearchCardScreen extends Component
                         style={{alignSelf: 'center', padding: 10}}
                         data={this.state.cardholdersInCircle}
                         renderItem={({item})=>
-                          <CreditCardWithButton colors={Utilities.getColorForCard(item.cardId)} title={item.name} subtitle={item.cardName}
+                          <CreditCardWithButton imgName={Utilities.getCardTemplateForCard(item.cardId)} title={item.name} subtitle={item.cardName}
                           leftButtonParams={{caption: UIStrings.REQUEST, icon: Constants.CARD_REQUEST_ICON_NAME, type: Constants.CARD_REQUEST_ICON_TYPE, onPress: ()=> this.onRequestPress(item)}} 
                           rightButtonParams={{caption: UIStrings.CALL, icon: "phone", onPress: ()=> Utilities.goToDialScreen(item.phoneNumber)}} />
                         }
@@ -315,8 +314,8 @@ class SearchCardScreen extends Component
                           style={{alignSelf: 'center', padding: 10}}
                           data={this.state.cardholdersOutsideCircle}
                           renderItem={({item})=>
-                            <CreditCardWithButton colors={Utilities.getColorForCard(item.cardId)} title={this.getSecondDegreeCardholderDisplayName(item.name, item.friendName)} subtitle={item.cardName}
-                            leftButtonParams={{caption: UIStrings.REQUEST, icon: Constants.CARD_REQUEST_ICON_NAME, type: Constants.CARD_REQUEST_ICON_TYPE, onPress: () => this.onRequestPress(item)}} 
+                            <CreditCardWithButton imgName={Utilities.getCardTemplateForCard(item.cardId)} title={this.getSecondDegreeCardholderDisplayName(item.name, item.friendName)} subtitle={item.cardName}
+                            leftButtonParams={{caption: UIStrings.REQUEST, icon: Constants.CARD_REQUEST_ICON_NAME, type: Constants.CARD_REQUEST_ICON_TYPE, onPress: () => this.onRequestPress(item, item.friendName)}} 
                             rightButtonParams={{caption: UIStrings.CALL, icon: "phone"}} />
                           }
                       /> 
@@ -335,11 +334,10 @@ class SearchCardScreen extends Component
 
             {/* Bottom menu */}
             <View style={styles.bottomMenu }>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
             </View>
         </View>
     );
@@ -368,7 +366,7 @@ const styles = StyleSheet.create({
       position: 'absolute', 
       bottom: 0, 
       flexDirection: 'row', 
-      justifyContent: 'center', 
+      justifyContent: 'space-between', 
       height: 60, 
       width: '100%', 
       padding: 10
@@ -404,18 +402,29 @@ const styles = StyleSheet.create({
   },
   arPopupTextValue:{
     fontFamily: Constants.APP_BODY_FONT, 
-    fontSize: 15,
-    textAlign: 'center',
+    fontSize: 14,
+    textAlign: 'left',
+    width: 180,
     color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
     textAlignVertical: 'center',
-    marginBottom: 20
   },
   arPopupTextName:{
-    fontFamily: Constants.APP_THIN_FONT, 
+    fontFamily: Constants.APP_BODY_FONT, 
     fontSize: 12,
     textAlign: 'center',
     color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
     textAlignVertical: 'center',
     paddingBottom: 3,
+  },
+  arInput:{
+    backgroundColor: Constants.BACKGROUND_GREY_COLOR, 
+    height: 40, 
+    marginLeft: 10, 
+    width: 180, 
+    alignSelf: 'center', 
+    borderRadius: 8, 
+    fontSize: 14, 
+    color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, 
+    fontFamily: "Montserrat-Light" 
   }
   });

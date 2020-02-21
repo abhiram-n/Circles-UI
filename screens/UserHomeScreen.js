@@ -41,24 +41,25 @@ export default class UserHomeScreen extends Component {
       showNotificationPopup: false
     }
 
-    this.askNotification = this.props.navigation.getParam("askNotification", false);
+    this.askNotificationPermissions = this.props.navigation.getParam("askNotification", false);
     this.initializeEncryption = this.props.navigation.getParam("initializeEncryption", false);
   }
 
   componentDidMount() {
     changeNavigationBarColor(Constants.BACKGROUND_WHITE_COLOR); 
     this._isMounted = true;
-    firebase.analytics().setCurrentScreen("Home");
+    firebase.analytics().setCurrentScreen("Home", "UserHomeScreen");
     if (this.initializeEncryption){
-      VirgilEncryptionHelpers.initializeVirgilForUser();
+      VirgilEncryptionHelpers.registerVirgilForUser();
     }
 
-    if (this.askNotification){
+    if (this.askNotificationPermissions){
       setTimeout(()=>{
         if (this._isMounted){
           this.setState({showNotificationPopup: true})
-        }, 
-        Constants.NOTIFICATION_POPUP_DELAY);
+        }
+      }, 
+      Constants.NOTIFICATION_POPUP_DELAY);
     }
     
     this.getUsersInCirlce();
@@ -93,7 +94,7 @@ export default class UserHomeScreen extends Component {
       if (responseJson != null){
         if (responseJson.friends != null){
           let friends = responseJson.friends.map(item=>{ return {name: item.name, profileImgUrl: item.profileImgUrl, id: item.id, numCards: item.numCards, key: item.id.toString()}});
-          
+
           // Tell the Flatlist to append the add button if Circle is not maxed out yet.
           if (responseJson.count > 0 && responseJson.count < Constants.MAX_NUMBER_IN_CIRCLE){
             addButton = {key: ADD_BUTTON_KEY}
@@ -119,33 +120,27 @@ export default class UserHomeScreen extends Component {
     this.props.navigation.navigate('Profile', params);
   }
 
-  getTruncatedName(item){
-    if (item.name == null || item.name == '' || item.name.indexOf(' ') == -1){
-      return item.name;
-    }
 
-    return item.name.split(" ")[0];
-  }
 
   render() {
     return (
       <View style={{  flexDirection: 'column', height: "100%", width: '100%'}}>
       <StatusBar translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
-      <TopLeftButton color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} imgPath={require("../assets/resources/logo_tp.png")} />
+      <TopLeftButton height={90} color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} imgPath={require("../assets/resources/logo_tp.png")} />
       
       {/* Menu on the top right */}
-      <View style={{zIndex: 101, position: 'absolute', top: 20, right: 10, flexDirection: 'column', justifyContent: 'center'}}>
-        <Icon name="ellipsis1" type="AntDesign" onPress={()=>this.setState(prevState=>({expandOptions: !prevState.expandOptions}))} style={{paddingVertical: 8, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
-        {
+      <View style={{zIndex: 101, position: 'absolute', top: 25, right: 10, flexDirection: 'row', justifyContent: 'center'}}>
+      {
           this.state.expandOptions ? 
-          <View>
-            <Icon name="user" type="AntDesign" onPress={()=>this.props.navigation.navigate('Profile')} style={{paddingVertical: 8, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
-            <Icon name="mail" type="AntDesign" onPress={()=>this.props.navigation.navigate('ContactUs')} style={{paddingVertical: 8, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
-            <Icon name="logout" type="AntDesign" onPress={()=>NavigationHelpers.logout(this.props.navigation)} style={{paddingVertical: 8, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
+          <View style={{flexDirection: 'row'}}>
+            <Icon name="user" type="AntDesign" onPress={()=>this.props.navigation.navigate('Profile')} style={{paddingHorizontal: 8, paddingTop: 5, fontSize: 26, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
+            <Icon name="mail" type="AntDesign" onPress={()=>this.props.navigation.navigate('ContactUs')} style={{paddingHorizontal: 8, paddingTop: 5, fontSize: 26, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
+            <Icon name="logout" type="AntDesign" onPress={()=>NavigationHelpers.logout(this.props.navigation)} style={{paddingHorizontal: 8, paddingTop: 5, fontSize: 25, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
           </View>
           :
           null
         }
+        <Icon name="ellipsis1" type="AntDesign" onPress={()=>this.setState(prevState=>({expandOptions: !prevState.expandOptions}))} style={{paddingTop: 5, paddingBottom: 4, paddingLeft: 5, fontSize: 26, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
       </View>
 
       {/* Prompt about notifications */}
@@ -156,7 +151,7 @@ export default class UserHomeScreen extends Component {
       {/* The top banner */}
        <View style={{alignItems: "center", position: "absolute", top: 0, height: Constants.SMALL_BANNER_HEIGHT, width: "100%"}}>
         <LinearGradient colors={Constants.APP_THEME_COLORS} style={{flexDirection: "column", justifyContent: 'center', width: '100%', height: '100%'}} >
-          <TouchableOpacity onPress={()=>this.props.navigation.navigate("SearchCard")}>
+          <TouchableOpacity onPress={()=>{ firebase.analytics().logEvent('findCards'); this.props.navigation.navigate("SearchCard")}}>
             <LottieView style={{alignSelf: 'center', width: '70%', height: 70, marginBottom: 5, marginHorizontal: 10}} 
                         source={require("../assets/resources/search.json")} autoPlay loop />
             <Text style={{textAlign: 'center', color: 'white', fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 14}}>{UIStrings.FIND_CARD}</Text>
@@ -172,7 +167,7 @@ export default class UserHomeScreen extends Component {
        <View style={{ position: "absolute", borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderRadius: 80, bottom: 0, height: Constants.LARGE_ARCH_SCREEN_HEIGHT, width: "100%", backgroundColor: Constants.BACKGROUND_WHITE_COLOR}}>
        <View style={{flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', alignContent: 'center'}}>
          <Text style={styles.title}>{UIStrings.MY_CIRCLE}</Text>
-         <Icon name="info-circle" type="FontAwesome5" style={{alignSelf: 'center', fontSize: 12, padding: 5, paddingLeft: 2}} onPress={()=>this.setState({showCircleTooltip: true})} />
+         <Icon name="ios-information-circle-outline" type="Ionicons" style={{alignSelf: 'center', fontSize: 14, padding: 5, paddingLeft: 2}} onPress={()=>this.setState({showCircleTooltip: true})} />
        </View>
        <Text style={styles.subtitle}>{UIStrings.SPOTS_LEFT} {this.state.spotsLeft}/{Constants.MAX_NUMBER_IN_CIRCLE}</Text>
         <ScrollView horizontal={false} style={{flex: 1,marginHorizontal: "5%", marginTop: "7%", marginBottom: Constants.BOTTOM_MENU_HEIGHT}}>
@@ -188,7 +183,7 @@ export default class UserHomeScreen extends Component {
                 colors={Constants.APP_THEME_COLORS} onPress={()=>this.props.navigation.navigate('AddToCircle')}
                 icon="adduser" iconType="AntDesign" caption={UIStrings.ADD_TO_CIRCLE} /> 
               <RoundIconWithBackgroundAndCaptionButton 
-                colors={Constants.APP_THEME_COLORS} onPress={()=>this.props.navigation.navigate('HowItWorks')}
+                colors={Constants.APP_THEME_COLORS} onPress={()=>this.props.navigation.navigate('HowItWorks', {colorOnExit: Constants.BACKGROUND_WHITE_COLOR})}
                 icon="bulb1" iconType="AntDesign" caption={UIStrings.HOW_IT_WORKS } /> 
             </View>
           : null}
@@ -205,7 +200,7 @@ export default class UserHomeScreen extends Component {
                     isLarge={false} icon="adduser" iconType="AntDesign"
                     caption={UIStrings.ADD} /> 
                     :
-                    <RoundImageWithCaptionButton onPress={()=>this.onFriendProfilePress(item)} caption={this.getTruncatedName(item)} 
+                    <RoundImageWithCaptionButton onPress={()=>this.onFriendProfilePress(item)} caption={Utilities.getFirstName(item.name)} 
                     imgUri={item.profileImgUrl}  subtitle={UIStrings.CARDS_COLON.concat([item.numCards])} />                  
                   }
                 </View>
@@ -216,12 +211,11 @@ export default class UserHomeScreen extends Component {
        </View>
 
         {/* Bottom menu */}
-        <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+        <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
         </View>
        </View>
     );

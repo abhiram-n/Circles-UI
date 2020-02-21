@@ -8,7 +8,7 @@ import firebase from "react-native-firebase";
 const FriendRequestButton = ({name, subtitle, onPress, imageSource, iconColor, iconName, status}) => (
     <TouchableOpacity style={styles.container} onPress={onPress}>
         <View style={styles.imageContainer}>
-            <Image defaultSource={require('../assets/resources/default_user.png')} source={{uri: imageSource}} resizeMethod="resize" style={styles.image}/>
+            <Image source={{uri: imageSource}} resizeMethod="resize" style={styles.image}/>
         </View>
         <View style={{flexDirection: 'column', width: '50%', height: '100%', justifyContent: 'center', alignContent: 'center', marginLeft: 10, overflow: 'hidden'}}>
             <Text numberOfLines={1} style={styles.name}>{name}</Text>
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
           margin: 5,
           alignSelf: 'center',
           overflow: "hidden",
-          backgroundColor: Constants.IMAGE_DEFAULT_BKGD_COLOR,
+          backgroundColor: "#f4f4f4",
       },
       name:{
           fontFamily: Constants.APP_SUBTITLE_FONT,

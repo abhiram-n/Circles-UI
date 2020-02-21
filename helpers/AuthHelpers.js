@@ -181,7 +181,8 @@ export async function clearTokens()
     await AsyncStorage.multiRemove([Constants.STORAGE_TOKEN_KEY,
                                      Constants.STORAGE_PHONE_NUMBER, 
                                      Constants.STORAGE_USER_ID, 
-                                     Constants.STORAGE_ENCRYPTION_ENABLED])
+                                     Constants.STORAGE_ENCRYPTION_ENABLED,
+                                     Constants.STORAGE_DEVICE_TOKEN_KEY])
   }
   catch (error)
   {

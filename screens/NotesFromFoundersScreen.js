@@ -1,12 +1,14 @@
 import React, {Component} from 'react';
-import { Image, Linking, StyleSheet, Text, View, PermissionsAndroid, StatusBar} from 'react-native';
+import { Image, Linking, StyleSheet, Text, View, PermissionsAndroid, StatusBar, TouchableOpacity} from 'react-native';
 import * as Constants from '../helpers/Constants';
 import * as AuthHelpers from '../helpers/AuthHelpers';
 import * as UIStrings from '../helpers/UIStrings';
 import LinearGradient from 'react-native-linear-gradient';
 import firebase from 'react-native-firebase';
 import IconWithCaptionButton from '../components/IconWithCaptionButton';
+import GradientButton from '../components/GradientButton';
 import TopLeftButton from '../components/TopLeftButton';
+import * as Utilities from '../helpers/Utilities';
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 
 export default class NotesFromFoundersScreen extends Component<Props>{
@@ -18,13 +20,23 @@ export default class NotesFromFoundersScreen extends Component<Props>{
             floatActive: false,
         }
 
-        this.blueColor = "#0000BD"
+        this.blueColor = "#001689"
 
     }
 
     componentDidMount(){
-        firebase.analytics().setCurrentScreen("NotesFromFounders");
+        firebase.analytics().setCurrentScreen("NotesFromFounders", "NotesFromFoundersScreen");
         changeNavigationBarColor(this.blueColor);
+    }
+
+    onImagePress(name){
+        firebase.analytics().logEvent("founderInfo", {name: name});
+        if (name == "anchal"){
+            Utilities.showLongToast("Hmm.. he spends his spare time traveling or hiking.")
+        }
+        else{
+            Utilities.showLongToast("Well, this guy loves watching football and reading books!")
+        }
     }
 
     render()
@@ -32,29 +44,36 @@ export default class NotesFromFoundersScreen extends Component<Props>{
         return(
             <View style={{flexDirection: 'column', height: "100%", width: '100%' }}>
             <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
-                <View style={{height: '20%', borderBottomRightRadius: 50, backgroundColor: '#0000BD'}} />
-                <TopLeftButton iconName={Constants.ICON_BACK_BUTTON} color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} onPress={()=>this.props.navigation.goBack()} />
-                <View style={{height: '90%', flexDirection: 'column'}} >
-                    <View style={{height: '70%',   backgroundColor: this.blueColor }} >
-                        <View style={{height: '100%', backgroundColor: Constants.BACKGROUND_WHITE_COLOR, borderBottomRightRadius: 50 }} >
-                            <Text style={{marginTop: 20, fontFamily: Constants.APP_TITLE_FONT, textAlign: 'center', fontSize: 20, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>A Note from Founders</Text>
-                            <Text style={{paddingHorizontal: 10, marginTop: 30, fontFamily: Constants.APP_BODY_FONT, textAlign: 'center', color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>
-                                Here is a sample text. Here is a sample text.Here is a sample text.Here is a sample text.Here is a sample text.Here is a sample text.Here is a sample text.Here is a sample text.Here is a sample text.Here is a sample text.
-                            </Text>
-                            <View style={{flexDirection: 'row', justifyContent:'center', marginTop: 20}}>
+                <View style={{height: '23%', borderBottomRightRadius: 50, backgroundColor: '#001689'}}>
+                <View style={{flexDirection: 'row', justifyContent:'center', marginTop: '10%'}}>
                                 <View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 20}}>
-                                    <Image source={require("../assets/resources/Small_Anchal.jpg")} style={{marginBottom: 10, alignSelf: 'center', width:50, height: 50, borderRadius: 25, overflow: 'hidden'}} />
-                                    <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, textAlign: 'center', fontFamily: Constants.APP_BODY_FONT}}>{UIStrings.ANCHAL}</Text>
+                                    <TouchableOpacity onPress={()=>this.onImagePress("anchal")}>
+                                        <Image source={require("../assets/resources/Small_anchal.png")} style={{marginBottom: 10, alignSelf: 'center', width:60, height: 60, borderRadius: 30, overflow: 'hidden'}} />
+                                    </TouchableOpacity>
+                                    <Text style={{color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, textAlign: 'center', fontFamily: Constants.APP_BODY_FONT}}>{UIStrings.ANCHAL}</Text>
                                 </View>
                                 <View style={{flexDirection: 'column', justifyContent: 'center'}}>
-                                    <Image source={require("../assets/resources/Small_Abhiram.jpg")} style={{marginBottom: 10, alignSelf: 'center', width:50, height: 50, borderRadius: 25, overflow: 'hidden'}} />
-                                    <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, textAlign: 'center', fontFamily: Constants.APP_BODY_FONT}}>{UIStrings.ABHIRAM}</Text>
+                                    <TouchableOpacity onPress={()=>this.onImagePress("abhiram")}>
+                                        <Image source={require("../assets/resources/Small_Abhiram.jpg")} style={{marginBottom: 10, alignSelf: 'center', width:60, height: 60, borderRadius: 30, overflow: 'hidden'}} />
+                                    </TouchableOpacity>
+                                    <Text style={{color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, textAlign: 'center', fontFamily: Constants.APP_BODY_FONT}}>{UIStrings.ABHIRAM}</Text>
                                 </View>
+                </View> 
+                </View>
+                <TopLeftButton iconName={Constants.ICON_BACK_BUTTON} color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} onPress={()=>this.props.navigation.goBack()} />
+                <View style={{height: '90%', flexDirection: 'column'}} >
+                    <View style={{height: '67%',   backgroundColor: this.blueColor }} >
 
-                            </View>
+                        <View style={{height: '100%', backgroundColor: Constants.BACKGROUND_WHITE_COLOR, borderBottomRightRadius: 50, }} >
+                            <Text style={{marginTop: 20, fontFamily: Constants.APP_TITLE_FONT, textAlign: 'center', fontSize: 20, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>A Note from Founders</Text>
+                            <Text style={{fontSize: 12.5, paddingHorizontal: 15, marginTop: 30, fontFamily: Constants.APP_BODY_FONT, textAlign: 'left', color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>
+                                {UIStrings.NOTE_FROM_FOUNDERS}
+                            </Text>
                         </View>   
                     </View>
-                    <View style={{height:'40%', backgroundColor: this.blueColor}} />
+                    <View style={{height:'40%', backgroundColor: this.blueColor, paddingTop: 20}}>
+                        <GradientButton colors={Constants.BUTTON_COLORS_REVERSE} title={UIStrings.TITLE_BACK} onPress={()=>this.props.navigation.goBack()} />
+                    </View>
                 </View>
              </View>
         )

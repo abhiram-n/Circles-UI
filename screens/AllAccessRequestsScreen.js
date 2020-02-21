@@ -36,7 +36,7 @@ export default class AllAccessRequestsScreen extends Component<Props>{
 
     componentDidMount(){
         this._isMounted = true;
-        firebase.analytics().setCurrentScreen("AllAccessRequests");
+        firebase.analytics().setCurrentScreen("AllAccessRequests", "AllAccessRequestsScreen");
         this.getUserRequests();
     }
 
@@ -103,6 +103,8 @@ export default class AllAccessRequestsScreen extends Component<Props>{
                 return Constants.FRIEND_REQUEST_ACCEPTED_ICON;
             case Constants.ACCESS_REQUEST_REJECTED_CODE:
                 return Constants.FRIEND_REQUEST_DECLINED_ICON;
+            case Constants.ACCESS_REQUEST_EXPIRED_CODE:
+                return Constants.ACCESS_REQUEST_EXPIRED_ICON
         }
 
         return Constants.FRIEND_REQUEST_ACTIVE_ICON;
@@ -114,6 +116,8 @@ export default class AllAccessRequestsScreen extends Component<Props>{
                 return Constants.SUCCESS_COLOR;
             case Constants.ACCESS_REQUEST_REJECTED_CODE:
                 return Constants.FRIEND_REQUEST_DECLINED_COLOR;
+            case Constants.ACCESS_REQUEST_EXPIRED_CODE:
+                    return Constants.ACCESS_REQUEST_EXPIRED_ICON_COLOR
         }
 
         return Constants.FRIEND_REQUEST_ACTIVE_COLOR;
@@ -125,6 +129,8 @@ export default class AllAccessRequestsScreen extends Component<Props>{
                 return UIStrings.ACCEPTED;
             case Constants.ACCESS_REQUEST_REJECTED_CODE:
                 return UIStrings.DECLINED;
+            case Constants.ACCESS_REQUEST_EXPIRED_CODE:
+                return UIStrings.EXPIRED
         }
 
         return UIStrings.PENDING;
@@ -144,7 +150,7 @@ export default class AllAccessRequestsScreen extends Component<Props>{
         return (
             <View style={{flexDirection: 'column', height: "100%", width: '100%'}}>
             <StatusBar translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
-            <TouchableOpacity onPress={()=>this.props.navigation.navigate('SearchCard')} style={{zIndex: 100, position: 'absolute', top: 20, right: 10, borderRadius: 20, width: 40, height: 40, backgroundColor: Constants.SUCCESS_COLOR, justifyContent: 'center'}}>
+            <TouchableOpacity onPress={()=>this.props.navigation.navigate('SearchCard')} style={{zIndex: 100, position: 'absolute', top: 30, right: 10, borderRadius: 20, width: 40, height: 40, backgroundColor: Constants.SUCCESS_COLOR, justifyContent: 'center'}}>
                 <Icon name="plus" type="FontAwesome5" style={{color: 'white', fontSize: 16, textAlign: 'center'}} />
             </TouchableOpacity> 
             
@@ -152,7 +158,7 @@ export default class AllAccessRequestsScreen extends Component<Props>{
             <View style={{justifyContent: "center", flexDirection: 'column', position: "absolute", top: 0, height: Constants.EXTRA_SMALL_BANNER_HEIGHT, width: "100%"}}>
               <LinearGradient colors={Constants.APP_THEME_COLORS} style={{alignContent: 'center', justifyContent: "center", flexDirection: 'column', width: '100%', height: '100%'}}>
                 <Text style={{textAlign: 'center', marginBottom: 5, fontFamily: Constants.APP_SUBTITLE_FONT, fontSize: 18, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.ACCESS_CARD_REQUESTS}</Text>
-                <Text style={{textAlign: 'center', marginBottom: 20, fontFamily: Constants.APP_THIN_FONT, fontSize: 14, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>This is a short description for the page</Text>
+                <Text style={{textAlign: 'center', marginBottom: 20, fontFamily: Constants.APP_BODY_FONT, fontSize: 12, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}}>{UIStrings.MANAGE_CARD_REQUESTS}</Text>
               </LinearGradient>
             </View>
 
@@ -202,12 +208,11 @@ export default class AllAccessRequestsScreen extends Component<Props>{
              </View>
 
               {/* Bottom menu */}
-              <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'center', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="home" iconType="AntDesign" caption={UIStrings.HOME} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCAST} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="search1" iconType="AntDesign" caption={UIStrings.TITLE_SEARCH} onPress={()=>{this.props.navigation.navigate('SearchCard')}} />
-                <IconWithCaptionButton icon="unlock" iconType="AntDesign" caption={"Access"} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={"Circle"} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
+              <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
+                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
+                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
+                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
+                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
               </View>             
              </View>
         );
@@ -278,7 +283,7 @@ const styles = StyleSheet.create({
         textAlign: 'center', 
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
         fontFamily: Constants.APP_BODY_FONT,
-        fontSize: 12,
+        fontSize: 11,
         padding: 5 
     }
 })

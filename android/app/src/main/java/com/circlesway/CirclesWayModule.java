@@ -23,7 +23,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class CirclesWayModule extends ReactContextBaseJavaModule implements ActivityEventListener {
     ReactApplicationContext reactContext;
-    private final static EXTRA_CHANNEL_ID = "circlesWay"
+    private static final String EXTRA_CHANNEL_ID = "circlesWay";
 
 
     public CirclesWayModule(ReactApplicationContext reactContext) {

@@ -6,7 +6,8 @@ import {
   Image,
   StatusBar,
   ImageBackground,
-  Animated
+  Animated,
+  TouchableOpacity
 } from "react-native";
 import * as Constants from "../helpers/Constants";
 import * as UIStrings from "../helpers/UIStrings";
@@ -29,7 +30,7 @@ export default class WelcomeScreen extends Component {
 
   componentWillMount() {
     // Sometimes setting navbar color doesn't work, so set again for First time users.
-    firebase.analytics().setCurrentScreen((screenName = "Welcome"));
+    firebase.analytics().setCurrentScreen("Welcome", "WelcomeScreen");
   }
   
   componentDidMount(){
@@ -43,7 +44,7 @@ export default class WelcomeScreen extends Component {
       return;
     }
 
-    this.props.navigation.navigate('SignUp');
+    this.props.navigation.navigate('CheckInviteCode');
   }
 
 
@@ -53,14 +54,16 @@ export default class WelcomeScreen extends Component {
         <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
           <Image source={require("../assets/resources/Circles-low-res-no-loop.gif")} 
             style={{ width: "100%", height: "60%", alignSelf: 'center', marginBottom: 0 }} />
-          <Animated.View style={{width: '100%', height: 200, opacity: this.state.fadeNum}}>
-              <GradientButton isLight colors={Constants.DEFAULT_GRADIENT} isLarge={true} title={UIStrings.TITLE_SIGNUP} onPress={()=>{this.goToPhoneVerification(false)}} style={{marginTop:10}}/>
+          <Animated.View style={{width: '100%', height: '24%', opacity: this.state.fadeNum}}>
+              <GradientButton isLight colors={Constants.DEFAULT_GRADIENT} isLarge={true} title={UIStrings.TITLE_SIGNUP} onPress={()=>{this.goToPhoneVerification(false)}} style={{marginTop:10}}/> 
               <GradientButton isLight colors={Constants.DEFAULT_GRADIENT} isLarge={true} title={UIStrings.TITLE_LOGIN} onPress={()=>{this.goToPhoneVerification(true)}} style={{marginTop:10}}/>
+              <GradientButton colors={Constants.INPUT_BACKGROUND_GRADIENT} isLarge={true} title={UIStrings.HOW_IT_WORKS} onPress={()=>{this.props.navigation.navigate('HowItWorks', {colorOnExit: Constants.BRAND_BACKGROUND_COLOR})}} style={{marginTop:10}}/>
           </Animated.View>
 
-          <Animated.View style={{width: '90%', flexDirection: 'row', justifyContent: 'space-between',opacity: this.state.fadeNum}}>
-            <Text onPress={()=>{this.props.navigation.navigate('HowItWorks')}} style={{fontFamily: Constants.APP_BODY_FONT,color: 'yellow', textDecorationLine:"underline"}}>{UIStrings.TITLE_HOW_IT_WORKS}</Text>
-            <Text style={{fontFamily: Constants.APP_BODY_FONT,color: 'yellow', textDecorationLine:"underline"}}>Note from Founders</Text>
+          <Animated.View style={{width: '90%', alignSelf: 'flex-end', opacity: this.state.fadeNum, marginRight: 15}}>
+            <TouchableOpacity onPress={()=>this.props.navigation.navigate('NotesFromFounders')} style={{flexDirection: 'column'}}>
+              <Image source={require('../assets/resources/scroll.png')} style={{width: 40, height: 40, borderRadius: 20, alignSelf: 'flex-end'}} />
+            </TouchableOpacity>
           </Animated.View>
         </View>
     );

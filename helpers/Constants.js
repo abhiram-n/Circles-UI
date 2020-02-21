@@ -1,6 +1,7 @@
 export const APP_GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.plankton.circles"
 export const APP_GET_CIRCLES_IN_URL = "getcircles.in"
 export const LOGO_URL = "https://firebasestorage.googleapis.com/v0/b/circles-way.appspot.com/o/photos%2Flogo%2FCircles_Logo_SM_dark.png?alt=media&token=adf06bed-8326-411a-9c9e-ce338742860e"
+export const WEBSITE_URL = "https://circlesway.com"
 
 // Request parameter constants
 export const PARAM_UPI = "upiID"
@@ -12,7 +13,7 @@ export const PARAM_CARDS = "CARDS"
 
 // General
 export const NONE = "None"
-export const MAX_NUMBER_IN_CIRCLE = 10
+export const MAX_NUMBER_IN_CIRCLE = 10 
 export const MAX_POST_LENGTH_SIZE = 140
 export const MIN_POST_LENGTH_SIZE = 5
 export const STORAGE_TOKEN_KEY = "CIRCLESTOKEN"
@@ -28,6 +29,7 @@ export const SERVER_ENDPOINT =  "https://api.circlesway.com"
 export const DELAY_BEFORE_MANUAL_OTP = 9000 // milliseconds
 export const LANDING_PAGE_BUTTON_DELAY = 3000
 export const NOTIFICATION_POPUP_DELAY = 3000
+export const MAX_RESEND_SMS_COUNT = 2
 
 // Auth
 export const AUTH_HEADER = "Authorization"
@@ -70,6 +72,7 @@ export const APP_THEME_COLORS = ['#0000B0', '#AF2BED'] // ['#1488cc', '#2b32b2']
 export const CARDHOLDER_ACTION_BUTTON = ['#F5f5f5', '#ffffff'] // ['#1488cc', '#2b32b2'] 
 export const ADD_TO_CIRCLE_BUTTON_COLORS = ['#0000bd', '#1D6EBA'] //#1a65ea
 export const BUTTON_COLORS = ['#001689', '#0154e8'] //3b7bed
+export const BUTTON_COLORS_REVERSE = ['#0154e8', '#001689'] //3b7bed
 export const SUCCESS_COLORS = ["#5DD95D", "#1BFA1B"]
 export const APP_STATUS_BAR_COLOR = 'transparent'
 export const APP_TEXT_COLOR = '#ffffff'
@@ -79,7 +82,7 @@ export const APP_FLOAT_BUTTON_COLOR = '#41c572'////"#8dd7c3",//green
 export const APP_PLACEHOLDER_TEXT_COLOR =  "#CECCCC"
 export const APP_NATIVE_NAV_BAR_COLOR = '#2b32b2'
 export const APP_HOME_SCREEN_BUTTON_TEXT_COLOR = '#1488cc'
-export const APP_HOW_IT_WORKS_COLOR = '#ffffff'
+export const APP_HOW_IT_WORKS_COLOR = '#f8f8f8'
 export const APP_LOADING_COLOR = '#F4B71A'
 export const APP_SUCCESS_COLOR = "#00C497"
 export const LIGHT_ICON_COLOR = "#ffffff"
@@ -109,8 +112,26 @@ export const CARDS_COLORS = [
 ]
 
 export const RESOURCE_PATH_PREFIX = '../assets/resources/'
-export const CARD_TEMPLATE_NAMES = ['new_card.png']
+export const CARD_TEMPLATE_NAMES = [
+    require('../assets/resources/Card1.png'),
+    require('../assets/resources/Card2.png'),
+    require('../assets/resources/Card3.png'),
+    require('../assets/resources/Card4.png'),
+    require('../assets/resources/Card5.png'),
+    require('../assets/resources/Card6.png'),
+    require('../assets/resources/Card7.png'),
+    require('../assets/resources/Card8.png'),
+    require('../assets/resources/Card9.png'),
+    require('../assets/resources/Card11.png'),
+    require('../assets/resources/Card12.png'),
+    require('../assets/resources/Card13.png'),
+    require('../assets/resources/Card14.png'),
+    require('../assets/resources/Card15.png'),
+    require('../assets/resources/Card16.png'),
+]
 export const DEFAULT_GRADIENT = ["#ffffff", "#ffffff"]
+export const INITIAL_SCREEN_TEXT_INPUT_COLOR = "#1242AF"
+export const INPUT_BACKGROUND_GRADIENT = ["#1242AF", "#1242AF"]
 
 // Colors for the Floating Button
 export const SIGN_OUT_COLOR = '#F44336'
@@ -185,6 +206,9 @@ export const ACCESS_REQUEST_FULFILLED_CODE = 2
 export const ACCESS_REQUEST_REJECTED_CODE = 3
 export const ACCESS_REQUEST_VALIDATED_CODE = 4
 export const ACCESS_REQUEST_INVALIDATED_CODE = 5
+export const ACCESS_REQUEST_EXPIRED_CODE = 6
+export const ACCESS_REQUEST_EXPIRED_ICON = "clock"
+export const ACCESS_REQUEST_EXPIRED_ICON_COLOR = "black"
 
 // Encryption
 export const IDENTITY_ALREADY_EXISTS_ERROR = "IdentityAlreadyExistsError"

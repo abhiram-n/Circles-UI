@@ -105,7 +105,7 @@ android {
         applicationId "com.plankton.circles"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 6
+        versionCode 9
         versionName "0.5"
     }
     signingConfigs {

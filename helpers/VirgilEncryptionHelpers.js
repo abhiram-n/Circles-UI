@@ -28,29 +28,42 @@ export async function getJWTToken(){
     return null;
 }
 
-export async function initializeVirgilForUser(){
-    let virgilRegistered = await AuthHelpers.getEncryptionEnabled() != null ? true : false;
-    let virgilUser = null;
-    try{
-        virgilUser = await EThree.initialize(getJWTToken, {AsyncStorage});
-        if (!virgilRegistered){
-          await virgilUser.register();
-          AuthHelpers.setEncryptionEnabled();
-        }
-
-        return virgilUser;
-    }
-    catch (err){
-      if (err.name != null && err.name == Constants.IDENTITY_ALREADY_EXISTS_ERROR){
-        rotatePrivateKeyIfNeeded(virgilUser);
-        AuthHelpers.setEncryptionEnabled();
-        return virgilUser;
-      }
-      
-      console.debug('Error while initializing Virgil for user: ' + err);
-    }
-
+export async function registerVirgilForUser(){
+  let virgilRegistered = await AuthHelpers.getEncryptionEnabled() != null ? true : false;
+  
+  if (virgilRegistered){
     return null;
+  }
+
+  return getVirgilUser(false);
+}
+
+export async function getVirgilUser(isUserRegistered){
+  let virgilUser = null;
+  isVirgilRegistered = isUserRegistered != null ? isUserRegistered : await AuthHelpers.getEncryptionEnabled() != null;
+
+  try
+  {
+    virgilUser = await EThree.initialize(getJWTToken, {AsyncStorage});
+
+    if (!isVirgilRegistered){
+      await virgilUser.register();
+      AuthHelpers.setEncryptionEnabled();
+    }
+
+    return virgilUser;
+  }
+  catch (err){
+    if (err.name != null && err.name == Constants.IDENTITY_ALREADY_EXISTS_ERROR){
+      rotatePrivateKeyIfNeeded(virgilUser);
+      AuthHelpers.setEncryptionEnabled();
+      return virgilUser;
+    }
+
+    console.log('ERROR: Virgil ' + err);
+  }
+
+  return null;
 }
 
 export async function rotatePrivateKeyIfNeeded( virgilUser:EThree){

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Platform, StyleSheet, Text, View,Linking,FlatList,NativeEventEmitter,NativeModules} from "react-native";
-import { ActivityIndicator, Picker, TextInput, ToastAndroid, StatusBar } from "react-native";
+import { ActivityIndicator, Image, Picker, TextInput, ToastAndroid, StatusBar } from "react-native";
 import { Button, Icon, InputGroup, Input } from "native-base";
 import { createStackNavigator, createAppContainer } from "react-navigation";
 import SearchableDropdown from "react-native-searchable-dropdown";
@@ -15,6 +15,8 @@ import RoundIconWithBackgroundAndCaptionButton from "../components/RoundIconWith
 import TopLeftButton from "../components/TopLeftButton";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import GradientButton from "../components/GradientButton";
+import LottieView from 'lottie-react-native'
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const CHECK_INVITE_CODE_EXISTS = "/auth/userExists?idCode="
 export default class CheckInviteCodeScreen extends Component<Props> {
@@ -30,8 +32,8 @@ export default class CheckInviteCodeScreen extends Component<Props> {
   }
 
   componentDidMount() {
+    firebase.analytics().setCurrentScreen("CheckInviteCode", "CheckInviteCodeScreen");
     this._isMounted = true;
-    // changeNavigationBarColor(Constants.BACKGROUND_WHITE_COLOR);
   }
 
   componentWillUnmount(){
@@ -93,19 +95,19 @@ export default class CheckInviteCodeScreen extends Component<Props> {
       <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
       <TopLeftButton iconName={Constants.ICON_BACK_BUTTON} onPress={()=>this.props.navigation.goBack()} color={Constants.TEXT_COLOR_FOR_DARK_BACKGROUND} />
       <View style={{flexDirection: 'column', alignSelf: 'center', justifyContent: 'center', flex: 1, padding: 20, width: '90%'}}>
+      <LottieView speed={0.3} source={require("../assets/resources/invite.json")} autoPlay loop style={{alignSelf: 'center',width: 50, height: 50, marginBottom: 20}} />
          <Text style={styles.title}>{UIStrings.ENTER_INVITE_CODE}</Text>
          <Text style={styles.subTitle}>{UIStrings.APP_INVITE_ONLY}</Text>
-          
           {/* Input for invite code */}
-          <View style={{flexDirection:'row', margin: 10, justifyContent: 'center'}}>
-            <InputGroup style={{width: '75%'}} disabled>
+          <View style={{flexDirection:'row', margin: 10, justifyContent: 'center', width: '75%', alignSelf: 'center'}}>
               <Input
                autoCapitalize="characters"
                editable={!this.state.disableInviteCode}
                onChangeText={text=>this.setState({inviteCode: text})}
                maxLength={Constants.INVITE_CODE_MAX_LENGTH}
-               style={{fontSize: 30, textAlign: 'center', color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, fontFamily: Constants.APP_BODY_FONT }} />
-            </InputGroup>
+               placeholder={UIStrings.PLACEHOLDER_ENTER_INVITE_CODE}
+               placeholderTextColor={Constants.APP_PLACEHOLDER_TEXT_COLOR}
+               style={styles.codeInput} />
           </View>
 
           {/* Status Notes */}
@@ -115,6 +117,11 @@ export default class CheckInviteCodeScreen extends Component<Props> {
           <View style={{marginTop: 30, flexDirection: 'row', justifyContent: 'center', alignSelf: 'center'}}>
               <GradientButton isLarge isLight colors={Constants.DEFAULT_GRADIENT} title={this.state.disableInviteCode ? UIStrings.TITLE_VERIFYING : UIStrings.TITLE_VERIFY} onPress={()=>this.onNextPress()}/>
           </View> 
+
+          <View style={{marginTop: 5, position: 'absolute', bottom: 5, flexDirection: 'row', justifyContent: 'center', alignSelf: 'center'}}>
+            <Text onPress={()=>Linking.openURL(Constants.WEBSITE_URL)} style={styles.dontHaveInvideCode}>Don't have an invite code? </Text>
+            <Text onPress={()=>Linking.openURL(Constants.WEBSITE_URL)} style={[ styles.dontHaveInvideCode]}>Sign up here!</Text>
+          </View>
        </View>
       </View>
 
@@ -127,6 +134,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center"
+  },
+  codeInput:{
+    borderRadius: 10, 
+    paddingHorizontal: 8, 
+    backgroundColor: Constants.INITIAL_SCREEN_TEXT_INPUT_COLOR, 
+    fontSize: 20, 
+    textAlign: 'center', 
+    color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND, 
+    fontFamily: Constants.APP_BODY_FONT 
+  },
+  dontHaveInvideCode:{
+    fontFamily: Constants.APP_THIN_FONT, 
+    fontSize: 13, 
+    color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND
   },
   title:{
     color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND,
@@ -156,7 +177,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
     fontFamily: Constants.APP_BODY_FONT,
-    color: Constants.ERROR_TEXT_COLOR,
+    color: Constants.SUCCESS_COLOR,
     fontSize: 13
   }
 });
