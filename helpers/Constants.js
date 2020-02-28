@@ -82,7 +82,7 @@ export const APP_FLOAT_BUTTON_COLOR = '#41c572'////"#8dd7c3",//green
 export const APP_PLACEHOLDER_TEXT_COLOR =  "#CECCCC"
 export const APP_NATIVE_NAV_BAR_COLOR = '#2b32b2'
 export const APP_HOME_SCREEN_BUTTON_TEXT_COLOR = '#1488cc'
-export const APP_HOW_IT_WORKS_COLOR = '#f8f8f8'
+export const APP_HOW_IT_WORKS_COLOR = '#ffffff'
 export const APP_LOADING_COLOR = '#F4B71A'
 export const APP_SUCCESS_COLOR = "#00C497"
 export const LIGHT_ICON_COLOR = "#ffffff"
@@ -138,6 +138,7 @@ export const SIGN_OUT_COLOR = '#F44336'
 
 export const APP_TITLE_FONT = "Montserrat-Bold"
 export const APP_SUBTITLE_FONT = "Montserrat-Regular"
+export const APP_ULTRA_THIN_FONT = "Montserrat-UltraLight"
 export const APP_BODY_FONT = "Montserrat-Light"
 export const APP_THIN_FONT = "Montserrat-Thin"
 export const ICON_CHECKMARK = "ios-checkmark-circle"

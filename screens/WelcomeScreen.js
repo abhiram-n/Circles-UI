@@ -60,8 +60,8 @@ export default class WelcomeScreen extends Component {
               <GradientButton colors={Constants.INPUT_BACKGROUND_GRADIENT} isLarge={true} title={UIStrings.HOW_IT_WORKS} onPress={()=>{this.props.navigation.navigate('HowItWorks', {colorOnExit: Constants.BRAND_BACKGROUND_COLOR})}} style={{marginTop:10}}/>
           </Animated.View>
 
-          <Animated.View style={{width: '90%', alignSelf: 'flex-end', opacity: this.state.fadeNum, marginRight: 15}}>
-            <TouchableOpacity onPress={()=>this.props.navigation.navigate('NotesFromFounders')} style={{flexDirection: 'column'}}>
+          <Animated.View style={{ alignSelf: 'flex-end', opacity: this.state.fadeNum, marginRight: 15}}>
+            <TouchableOpacity onPress={()=>this.props.navigation.navigate('NotesFromFounders')} style={{flexDirection: 'column', width: 40}}>
               <Image source={require('../assets/resources/scroll.png')} style={{width: 40, height: 40, borderRadius: 20, alignSelf: 'flex-end'}} />
             </TouchableOpacity>
           </Animated.View>

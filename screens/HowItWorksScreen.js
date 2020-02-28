@@ -14,12 +14,12 @@ export default class HowItWorksScreen extends Component<Props>{
             {
                 key: 'first',
                 backgroundColor: Constants.APP_HOW_IT_WORKS_COLOR, 
-                text: "A Circle is a private space for 10 of your close friends and family with whom you're comfortable enough to share your credit and debit cards.",
+                text: "A Circle is a trusted space for 10 of your close friends and family you're comfortable sharing your credit and debit cards with.",
                 title: "Your Circle",
                 imageStyle: styles.image,                
                 textStyle: styles.text,
                 titleStyle: styles.title,
-                image: require('../assets/resources/hiw_1.jpg'),
+                image: require('../assets/resources/howitworks1.png'),
             },
             {
                 key: 'second',
@@ -28,17 +28,17 @@ export default class HowItWorksScreen extends Component<Props>{
                 title: "Discover",
                 imageStyle: styles.image,                
                 textStyle: styles.text,
-                image: require('../assets/resources/hiw_2.jpg'),
+                image: require('../assets/resources/howitworks2.png'),
                 titleStyle: styles.title,
             },
             {
                 key: 'third',
                 backgroundColor: Constants.APP_HOW_IT_WORKS_COLOR,
-                text: "Send requests to share card details in an end-to-end encrypted chat. No one else, not even Circles, can access the chat messages.",
+                text: "Send requests to share card details in a self-destructing end-to-end encrypted chat. No one else, not even Circles, can access chat messages.",
                 title: "Request and Share",
                 imageStyle: styles.image,
-                textStyle: styles.text,
-                image: require('../assets/resources/hiw_3.jpg'),
+                textStyle: styles.smallText,
+                image: require('../assets/resources/howitworks3.png'),
                 titleStyle: styles.title
             },
         ]
@@ -61,13 +61,13 @@ export default class HowItWorksScreen extends Component<Props>{
 
     _renderDoneButton = () => {
         return (
-          <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_THIN_FONT}}>Done</Text>
+          <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_ULTRA_THIN_FONT}}>Done</Text>
         );
       };
     
     _renderNextButton = () => {
         return (
-          <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_THIN_FONT}}>Next</Text>
+          <Text style={{color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND, fontFamily: Constants.APP_ULTRA_THIN_FONT}}>Next</Text>
         );
       };
 
@@ -81,13 +81,19 @@ export default class HowItWorksScreen extends Component<Props>{
 
 const styles = StyleSheet.create({
     text:{
-        fontFamily: Constants.APP_THIN_FONT,
+        fontFamily: Constants.APP_ULTRA_THIN_FONT,
         fontSize: 14,
         textAlign: 'center',
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
     },
+    smallText:{
+        fontFamily: Constants.APP_ULTRA_THIN_FONT,
+        fontSize: 13.5,
+        textAlign: 'center',
+        color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
+    },
     title: {
-        fontFamily: Constants.APP_THIN_FONT,
+        fontFamily: Constants.APP_ULTRA_THIN_FONT,
         textAlign: 'center',
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
     },
@@ -95,8 +101,8 @@ const styles = StyleSheet.create({
         color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
     },
     image:{
-        maxWidth: "70%",
-        maxHeight: "60%",
+        width: 232,
+        height: "71%",
         borderWidth: 2,
         borderRadius: 8,
     },

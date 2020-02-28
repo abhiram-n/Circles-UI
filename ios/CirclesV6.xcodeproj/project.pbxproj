@@ -76,6 +76,8 @@
 		1BCB300B9AD84A3E902124F5 /* libRCTImageResizer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 44C57053BFF249EF9904AB95 /* libRCTImageResizer.a */; };
 		24B94BD12AAB4243829F675B /* libSplashScreen.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FBAB8C3FBB24B4BA6D1440A /* libSplashScreen.a */; };
 		3EE732B1C3674BD7B17015C3 /* libLottieReactNative.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DD8E6C8DA2A449F9A433EF6A /* libLottieReactNative.a */; };
+		7DD63A25541A42BDA39E8A26 /* Montserrat-UltraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 5D53C186BABE4979BE07B08D /* Montserrat-UltraLight.otf */; };
+		7BC310D2F04F40FAA53909C7 /* Roboto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D4C46EECD7F94EDC9A891537 /* Roboto-Bold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -433,6 +435,8 @@
 		5FBAB8C3FBB24B4BA6D1440A /* libSplashScreen.a */ = {isa = PBXFileReference; name = "libSplashScreen.a"; path = "libSplashScreen.a"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = archive.ar; explicitFileType = undefined; includeInIndex = 0; };
 		F519461B0F6D46DA9C6941D8 /* LottieReactNative.xcodeproj */ = {isa = PBXFileReference; name = "LottieReactNative.xcodeproj"; path = "../node_modules/lottie-react-native/src/ios/LottieReactNative.xcodeproj"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.pb-project; explicitFileType = undefined; includeInIndex = 0; };
 		DD8E6C8DA2A449F9A433EF6A /* libLottieReactNative.a */ = {isa = PBXFileReference; name = "libLottieReactNative.a"; path = "libLottieReactNative.a"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = archive.ar; explicitFileType = undefined; includeInIndex = 0; };
+		5D53C186BABE4979BE07B08D /* Montserrat-UltraLight.otf */ = {isa = PBXFileReference; name = "Montserrat-UltraLight.otf"; path = "../assets/fonts/Montserrat-UltraLight.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		D4C46EECD7F94EDC9A891537 /* Roboto-Bold.ttf */ = {isa = PBXFileReference; name = "Roboto-Bold.ttf"; path = "../assets/fonts/Roboto-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -751,6 +755,8 @@
 				C0F73E128C934486B0B13761 /* Montserrat-ExtraBold.otf */,
 				96B679AE355F447C81029C78 /* Montserrat-Regular.otf */,
 				48BF834347934D5A8F95E9E0 /* Montserrat-Light.otf */,
+				5D53C186BABE4979BE07B08D /* Montserrat-UltraLight.otf */,
+				D4C46EECD7F94EDC9A891537 /* Roboto-Bold.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1225,6 +1231,8 @@
 				B7105AB0C3DA48CDBAFA0682 /* Montserrat-ExtraBold.otf in Resources */,
 				A4E560F976A744A3BCCA55CA /* Montserrat-Regular.otf in Resources */,
 				7045CA53FAFD48A89FA6F8A6 /* Montserrat-Light.otf in Resources */,
+				7DD63A25541A42BDA39E8A26 /* Montserrat-UltraLight.otf in Resources */,
+				7BC310D2F04F40FAA53909C7 /* Roboto-Bold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
