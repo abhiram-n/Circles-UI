@@ -388,8 +388,8 @@ class SignUpScreen extends Component<Props> {
         <Text style={styles.title}>{UIStrings.GREAT_WELCOME}</Text>
           <View style={{alignSelf: 'center'}}>
           {this.state.imageUri == null ? 
-            <RoundIconWithBackgroundAndCaptionButton isLight thinFont colors={Constants.DEFAULT_GRADIENT}  onPress={()=>this.showNotificationOrLaunchImagePicker()} 
-              isLarge={true} iconType="SimpleLineIcons" caption={"Add Photo"} icon="camera" />
+            <RoundIconWithBackgroundAndCaptionButton isLight isLarge thinFont colors={Constants.DEFAULT_GRADIENT}  onPress={()=>this.showNotificationOrLaunchImagePicker()} 
+              iconParams={{type:"SimpleLineIcons",icon:"camera", size: 40}} caption={"Add Photo"}  />
             :
             <RoundImageWithCaptionButton onPress={()=>this.showNotificationOrLaunchImagePicker()} isLarge={true} imgUri={this.state.imageUri}  />
           }

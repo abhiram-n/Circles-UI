@@ -15,6 +15,7 @@ import RoundIconWithBackgroundAndCaptionButton from "../components/RoundIconWith
 import RoundImageWithCaptionButton from "../components/RoundImageWithCaptionButton";
 import FriendRequestButton from "../components/FriendRequestButton";
 import TopRightButton from "../components/TopRightButton";
+import BottomMenu from "../components/BottomMenu";
 import CreditCardWithButton from "../components/CreditCardWithButtons";
 import { ScrollView } from "react-native-gesture-handler";
 import TopLeftButton from "../components/TopLeftButton";
@@ -116,8 +117,7 @@ export default class UserHomeScreen extends Component {
   }
   
   onFriendProfilePress(item){
-    let params = {userId: item.id}
-    this.props.navigation.navigate('Profile', params);
+    this.props.navigation.navigate({routeName: 'Profile', params: {userId: item.id}, key: 'Profile' + item.id});
   }
 
 
@@ -133,7 +133,6 @@ export default class UserHomeScreen extends Component {
       {
           this.state.expandOptions ? 
           <View style={{flexDirection: 'row'}}>
-            <Icon name="user" type="AntDesign" onPress={()=>this.props.navigation.navigate('Profile')} style={{paddingHorizontal: 8, paddingTop: 5, fontSize: 26, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
             <Icon name="mail" type="AntDesign" onPress={()=>this.props.navigation.navigate('ContactUs')} style={{paddingHorizontal: 8, paddingTop: 5, fontSize: 26, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
             <Icon name="logout" type="AntDesign" onPress={()=>NavigationHelpers.logout(this.props.navigation)} style={{paddingHorizontal: 8, paddingTop: 5, fontSize: 25, color: Constants.TEXT_COLOR_FOR_DARK_BACKGROUND}} />
           </View>
@@ -178,13 +177,16 @@ export default class UserHomeScreen extends Component {
             null }
           { this.state.errorString != null ? <Text style={[styles.title, {fontSize: 14, color: Constants.APP_LOADING_COLOR, marginTop: 20}]}>{UIStrings.COULD_NOT_CONNECT_SERVER}</Text> : null }
           { this.state.numFriends == 0 ? 
-            <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 40, alignSelf: 'center'}}>
-              <RoundIconWithBackgroundAndCaptionButton 
-                colors={Constants.APP_THEME_COLORS} onPress={()=>this.props.navigation.navigate('AddToCircle')}
-                icon="adduser" iconType="AntDesign" caption={UIStrings.ADD_TO_CIRCLE} /> 
-              <RoundIconWithBackgroundAndCaptionButton 
-                colors={Constants.APP_THEME_COLORS} onPress={()=>this.props.navigation.navigate('HowItWorks', {colorOnExit: Constants.BACKGROUND_WHITE_COLOR})}
-                icon="bulb1" iconType="AntDesign" caption={UIStrings.HOW_IT_WORKS } /> 
+            <View style={{flexDirection: 'column', justifyContent: 'center'}}>
+              <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 40, alignSelf: 'center'}}>
+                <RoundIconWithBackgroundAndCaptionButton 
+                  colors={Constants.APP_THEME_COLORS} onPress={()=>this.props.navigation.navigate('AddToCircle')}
+                  iconParams={{icon:"adduser",type:"AntDesign", size: 28}} caption={UIStrings.ADD_TO_CIRCLE} /> 
+                <RoundIconWithBackgroundAndCaptionButton 
+                  colors={Constants.APP_THEME_COLORS} onPress={()=>this.props.navigation.navigate('EditCardsOnProfile')}
+                  iconParams={{icon:"ios-card",type:"Ionicons", size: 40}} caption={UIStrings.ADD_CARDS} /> 
+              </View>
+              <Text style={styles.howItWorks} onPress={()=>this.props.navigation.navigate('HowItWorks', {colorOnExit: Constants.BACKGROUND_WHITE_COLOR})}>{UIStrings.CHECK_HOW_IT_WORKS}</Text>
             </View>
           : null}
           {this.state.numFriends > 0 ?
@@ -197,7 +199,7 @@ export default class UserHomeScreen extends Component {
                     item.key == ADD_BUTTON_KEY ? 
                     <RoundIconWithBackgroundAndCaptionButton 
                     colors={Constants.APP_THEME_COLORS} onPress={()=>this.props.navigation.navigate('AddToCircle')}
-                    isLarge={false} icon="adduser" iconType="AntDesign"
+                    isLarge={false} iconParams={{icon:"adduser", type:"AntDesign", size: 28}}
                     caption={UIStrings.ADD} /> 
                     :
                     <RoundImageWithCaptionButton onPress={()=>this.onFriendProfilePress(item)} caption={Utilities.getFirstName(item.name)} 
@@ -211,12 +213,7 @@ export default class UserHomeScreen extends Component {
        </View>
 
         {/* Bottom menu */}
-        <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
-        </View>
+        <BottomMenu navigation={this.props.navigation} />
        </View>
     );
   }
@@ -257,5 +254,11 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16, 
     color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND
-  }
+  },
+  howItWorks:{
+    marginTop: 20, 
+    textDecorationLine: 'underline', 
+    textAlign: 'center', 
+    fontFamily: Constants.APP_BODY_FONT, 
+    color: Constants.GREY_TEXT_COLOR}
 });

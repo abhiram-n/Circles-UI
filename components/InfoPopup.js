@@ -14,16 +14,6 @@ const InfoPopup = ({isVisible, onClose, title, content, buttonParams, lottieProp
   <View style={[CommonStyles.popupContainer, makeExteriorTransparent ? styles.exteriorTransparent : null]}>
     <View style={[CommonStyles.popup, {padding: 15}]}>
       <TopRightButton color={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} iconName="times" onPress={onClose} height={40}/>
-      {/* {iconName != null ? 
-        <Icon name={iconName} type="FontAwesome5" style={{margin: 10, alignSelf: 'center', fontSize: 100, color: Constants.APP_THEME_COLORS[0]}}/>
-        : 
-        null
-      }
-      {imageName != null ? 
-        <Image resizeMethod="resize" resizeMode="contain" source={imageName} style={{alignSelf: 'center', width: 130, height: 130, marginVertical: 20, marginHorizontal: 10}} />
-        :
-        null
-      } */}
       {lottieProps != null ?
         <LottieView speed={lottieProps.speed ?? 1} style={{alignSelf: 'center', width: '70%', height: 100, marginVertical: 5, marginHorizontal: 10}} source={lottieProps.name} autoPlay loop />
         : 

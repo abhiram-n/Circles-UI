@@ -39,11 +39,21 @@ public class CirclesWayModule extends ReactContextBaseJavaModule implements Acti
 
     @ReactMethod
     public void openChannelSettings(){
-        Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-        .putExtra(Settings.EXTRA_APP_PACKAGE, getReactApplicationContext().getPackageName())
-        .putExtra(Settings.EXTRA_CHANNEL_ID, EXTRA_CHANNEL_ID);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getReactApplicationContext().startActivity(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { 
+            Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, getReactApplicationContext().getPackageName())
+            .putExtra(Settings.EXTRA_CHANNEL_ID, EXTRA_CHANNEL_ID);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getReactApplicationContext().startActivity(intent);
+        }
+        else{
+            Intent intent = new Intent();
+            intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("app_package", getReactApplicationContext().getPackageName());
+            intent.putExtra("app_uid", getReactApplicationContext().getApplicationInfo().uid);
+            getReactApplicationContext().startActivity(intent);
+        }
     }
 
     @ReactMethod

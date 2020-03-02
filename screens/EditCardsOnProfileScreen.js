@@ -25,6 +25,7 @@ import LinearGradient from "react-native-linear-gradient";
 import CreditCardWithText from "../components/CreditCardWithText";
 import IconWithCaptionButton from '../components/IconWithCaptionButton';
 import GradientButton from "../components/GradientButton";
+import BottomMenu from '../components/BottomMenu';
 import LottieView from 'lottie-react-native';
 
 const REGULAR_CARDS_API = "/card/filter?type=Regular";
@@ -46,46 +47,90 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
     componentDidMount(){
         firebase.analytics().setCurrentScreen("EditCardsOnProfile", "EditCardsOnProfileScreen");
         this._isMounted = true;
-        let cards = JSON.parse(this.props.navigation.getParam("cards"));
-        this.setState({ loading: true,  selectedCards: cards.map((item) => {  return {name: item.name, id: item.id, key: item.id.toString()}})}, 
-                      ()=>{this.numInitialCards = this.state.selectedCards.length});
 
-        fetch(Constants.SERVER_ENDPOINT + REGULAR_CARDS_API, { method: "GET" })
-        .then(response => {
-          if (!this._isMounted){
-            return null;
+        if (this.props.navigation.getParam("cards") == null){
+          this.getCardsOnProfile();
+          this.getAllCards();
+          return;
         }
 
-          this.setState({loading: false});
-          if (response.ok) {
-            return response.json();
-          }
+        let cards = JSON.parse(this.props.navigation.getParam("cards"));
+        this.setState({selectedCards: cards.map((item) => {  return {name: item.name, id: item.id, key: item.id.toString()}})}, 
+                      ()=>{this.numInitialCards = this.state.selectedCards.length});
+        this.getAllCards();
+    }
 
-          if (response.status == Constants.TOKEN_EXPIRED_STATUS_CODE){
-            Utilities.showLongToast(UIStrings.SESSION_EXPIRED);
-            return null;
-          }
-
-          Utilities.showLongToast(UIStrings.GENERIC_ERROR);
+    async getCardsOnProfile(){
+      let headers = await AuthHelpers.getRequestHeaders();
+      this.setState({loading: true})
+      fetch(Constants.SERVER_ENDPOINT + Constants.PROFILE_API, { method: 'GET', headers: headers })
+      .then((response) => {
+        if (!this._isMounted){return null;}
+        if (response.ok) { 
+          return response.json();
+        }
+  
+        this.setState({loading: false});
+        if(response.status == Constants.TOKEN_EXPIRED_STATUS_CODE){
+          Utilities.showLongToast(UIStrings.SESSION_EXPIRED);
           return null;
-        })
-        .then(responseJson => {
-          if (responseJson != null && this._isMounted) {
-            var cardArray = responseJson.cards.map(item => {
-              return { name: item.name, id: item.id, key: item.id.toString() };
-            });
-            this.setState({ cards: cardArray });
-          }
-        })
-        .catch(error => {
-          if (!this._isMounted){
-            return null;
-          }
+        }
+        
+        Utilities.showLongToast(UIStrings.GENERIC_ERROR);
+        return null;
+      })
+      .then((responseJson) => {
+        if (this._isMounted && responseJson != null){
+          this.name = responseJson.name;
+          this.setState({
+              selectedCards: responseJson.cards.map((item) => { return {name: item.name, id:item.id, key: item.id.toString()}})},
+              ()=>{this.numInitialCards = this.state.selectedCards.length});
+        }
+      })
+      .catch((error) => { 
+        if (!this._isMounted) {return null;}
+        this.setState({loading: false});
+        console.log('The error message for Profile is: ' + error); 
+        Utilities.showLongToast(UIStrings.GENERIC_ERROR);
+      })
+    }
 
-          this.setState({loading: false});
-          ToastAndroid.showWithGravity("Sorry, something went wrong. Please try later.", duration= ToastAndroid.LONG, gravity = ToastAndroid.TOP);
-          console.log("Error for allcards is: " + error);
-        });
+    getAllCards(){
+      this.setState({loading: true})
+      fetch(Constants.SERVER_ENDPOINT + REGULAR_CARDS_API, { method: "GET" })
+      .then(response => {
+        if (!this._isMounted){
+          return null;
+        }
+
+        this.setState({loading: false});
+        if (response.ok) {
+          return response.json();
+        }
+
+        if (response.status == Constants.TOKEN_EXPIRED_STATUS_CODE){
+          Utilities.showLongToast(UIStrings.SESSION_EXPIRED);
+          return null;
+        }
+
+        Utilities.showLongToast(UIStrings.GENERIC_ERROR);
+        return null;
+      })
+      .then(responseJson => {
+        if (responseJson != null && this._isMounted) {
+          var cardArray = responseJson.cards.map(item => {
+            return { name: item.name, id: item.id, key: item.id.toString() };
+          });
+          this.setState({ cards: cardArray });
+        }
+      })
+      .catch(error => {
+        if (!this._isMounted){ return null; }
+
+        this.setState({loading: false});
+        Utilities.showLongToast(UIStrings.GENERIC_ERROR);
+        console.log("Error for allcards is: " + error);
+      });
     }
 
     onSelectCardItem(item) {
@@ -155,7 +200,7 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
         return (
             <View  style={styles.container}>
             <StatusBar  translucent backgroundColor={Constants.APP_STATUS_BAR_COLOR} />
-              <View style={{width: "100%", marginTop: 40}}>
+              <View style={{width: "100%", paddingTop: 40, paddingBottom: 20,backgroundColor: Constants.BACKGROUND_GREY_COLOR, borderBottomLeftRadius: 40, borderBottomRightRadius: 40}}>
                   <Text style={{fontSize: 25, textAlign: 'center', fontFamily: Constants.APP_BODY_FONT, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.ADD_OR_DELETE_CARDS}</Text>
               </View>
               <View style={{marginTop: 20, width: '100%'}}>
@@ -209,12 +254,7 @@ export default class EditCardsOnProfileScreen extends Component<Props>{
               <GradientButton title={UIStrings.TITLE_SAVE} onPress={()=>{this.onSave();}} />
 
               {/* Bottom menu */}
-              <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
-              </View>
+              <BottomMenu navigation={this.props.navigation} />
             </View>
         )
     }

@@ -13,6 +13,7 @@ import IconWithCaptionButton from '../components/IconWithCaptionButton';
 import LinearGradient from 'react-native-linear-gradient';
 import RoundIconWithBackgroundAndCaptionButton from '../components/RoundIconWithBackgroundAndCaptionButton';
 import CommonStyles from '../components/CommonStyles';
+import BottomMenu from '../components/BottomMenu';
 import { FlatList } from 'react-native-gesture-handler';
 import FriendRequestButton from '../components/FriendRequestButton';
 import LottieView from 'lottie-react-native'
@@ -186,7 +187,7 @@ export default class AllAccessRequestsScreen extends Component<Props>{
                             {this.state.count == 0 ? <Text style={styles.noPostsText}>{this.state.receivedRequestsPressed ? UIStrings.TIP_EXPAND_CIRCLE_INCREASE_ACTIVITY : UIStrings.DISCOVER_CARDS_AND_SEND_ACCESS_REQUEST}</Text> : null}
                             {this.state.count == 0  ? 
                                 <View style={{marginTop: 30, alignSelf: 'center', alignContent: 'center'}}>
-                                    <RoundIconWithBackgroundAndCaptionButton icon="plus" iconType="FontAwesome5" 
+                                    <RoundIconWithBackgroundAndCaptionButton iconParams={{icon:"plus", type:"FontAwesome5", size: 28}} 
                                     colors={Constants.APP_THEME_COLORS} onPress={()=>{this.props.navigation.navigate('SearchCard')}} 
                                     textColor={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} caption={UIStrings.NEW} />
                                 </View>
@@ -208,12 +209,7 @@ export default class AllAccessRequestsScreen extends Component<Props>{
              </View>
 
               {/* Bottom menu */}
-              <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
-              </View>             
+              <BottomMenu navigation={this.props.navigation} />            
              </View>
         );
     }

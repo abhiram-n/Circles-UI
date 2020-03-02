@@ -5,11 +5,11 @@ import { Button, Icon } from "native-base";
 import LinearGradient from "react-native-linear-gradient";
 import firebase from "react-native-firebase";
 
-const RoundIconWithBackgroundAndCaptionButton = ({colors, isLarge, caption, icon, iconType, onPress, isLight, thinFont}) => (
+const RoundIconWithBackgroundAndCaptionButton = ({colors, isLarge, caption, iconParams, onPress, isLight, thinFont}) => (
     <TouchableOpacity style={[styles.container, isLarge ? styles.containerMedium : styles.containerSmall]} onPress={onPress}>
         <LinearGradient colors={colors} start={{x:0, y:1}} end={{x:1, y:1}} style={[styles.circle, isLarge ? styles.circleMedium : styles.circleSmall]}>
-            <Icon name={icon} type={iconType} style={[styles.icon, 
-                                                      isLarge ? styles.iconMedium : styles.iconSmall, 
+            <Icon name={iconParams.icon} type={iconParams.type} style={[styles.icon, 
+                                                      {fontSize: iconParams.size}, 
                                                       {color: isLight ? Constants.BRAND_BACKGROUND_COLOR : Constants.LIGHT_ICON_COLOR}]}/>
         </LinearGradient>
         <Text numberOfLines={2} style={[styles.caption, 

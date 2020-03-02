@@ -15,15 +15,14 @@ const IconWithCaptionButton = ({caption, icon, iconType, onPress}) => (
 const styles = StyleSheet.create({
     caption:{
         color: 'black',
-        fontSize: 12,
+        fontSize: 10,
         fontFamily: "Montserrat-Light",
         textAlign: 'center',
         paddingTop: 3 
     },
       container:{
         flexDirection: 'column', 
-        marginHorizontal: 5, 
-        width: 70
+        width: 60
       },
       icon:{
         alignSelf: 'center', 

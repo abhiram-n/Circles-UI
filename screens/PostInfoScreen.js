@@ -17,6 +17,7 @@ import RoundImageWithCaptionButton from '../components/RoundImageWithCaptionButt
 import CreditCardWithText from '../components/CreditCardWithText';
 import IconWithCaptionButton from '../components/IconWithCaptionButton';
 import RowWithTextLeftAndRight from '../components/RowWithTextLeftAndRight';
+import BottomMenu from '../components/BottomMenu';
 import LottieView from 'lottie-react-native';
 
 const GET_POST_API = "/posts?id=";
@@ -133,12 +134,7 @@ export default class PostInfoScreen extends Component<Props>{
             </View>
 
             {/* Bottom menu */}
-            <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 100, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: 60, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
-            </View>
+            <BottomMenu navigation={this.props.navigation} />
         </View>
         );
     }

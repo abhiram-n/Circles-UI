@@ -13,6 +13,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import firebase from 'react-native-firebase';
 import IconWithCaptionButton from '../components/IconWithCaptionButton'
 import CreditCardWithText from '../components/CreditCardWithText'
+import BottomMenu from '../components/BottomMenu'
 import TopRightButton from '../components/TopRightButton';
 import CreditCardWithButton from '../components/CreditCardWithButtons';
 import GradientButton from '../components/GradientButton';
@@ -212,12 +213,12 @@ export default class ProfileScreen extends Component<Props>{
                       source={require("../assets/resources/loading.json")} autoPlay loop />
                     :
                     null}
-                  <View style={{flexDirection: 'row', padding: 10, paddingVertical: 8}}>
+                  <View style={{flexDirection: 'row', padding: 10, paddingVertical: 3}}>
                       <Icon name="user" type="FontAwesome5" style={styles.icon} />
                       <Text numberOfLines={1} style={styles.infoTitle}>{this.state.name}</Text>
                   </View>
                   <View style={styles.line} />
-                  <View style={{flexDirection: 'row', padding: 10, paddingVertical: 8}}>
+                  <View style={{flexDirection: 'row', padding: 10, paddingVertical: 3}}>
                       <Icon name="phone" type="FontAwesome" style={styles.icon} />
                       <Text style={styles.infoTitle}>{this.state.phoneNumber}</Text>
                   </View>
@@ -226,25 +227,13 @@ export default class ProfileScreen extends Component<Props>{
                   {/* Show the cards */}
                   {
                     this.state.showNoCardsOnProfile ? 
-                      <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+                      <View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
                         <Text style={[styles.infoTitle, {padding: 10, textAlign: 'center'}]}>{UIStrings.NO_CARDS_ON_PROFILE}</Text>
-                        {
-                          this.userId == null ? 
-                          <Icon onPress={()=>this.editCards()} name="edit" type="FontAwesome" style={{textAlignVertical: 'center', paddingRight: '5%',  fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}/>
-                          :
-                          null
-                        }
                       </View>
                       :
-                      <View>
+                      <View style={{marginBottom: 20, marginTop: 10}}>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                           <Text style={{paddingLeft: '5%', fontFamily: Constants.APP_BODY_FONT, fontSize: 12, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}>{UIStrings.CARDS_COLON}{this.state.cards.length}</Text>
-                          {
-                            this.userId == null ?
-                            <Icon onPress={()=>this.editCards()} name="edit" type="FontAwesome" style={{paddingRight: '5%', textAlign: 'right', fontSize: 16, color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND}}/>
-                            :
-                            null
-                          }
                         </View>
                         {
                           this.userId == null ?
@@ -263,18 +252,17 @@ export default class ProfileScreen extends Component<Props>{
 
                       </View>
                   }
+                  {
+                      this.userId == null ?
+                      <GradientButton title={UIStrings.ADD_CARDS} onPress={()=>this.editCards()} />
+                      :
+                      null
+                  }
                   
                </ScrollView>
              </View>
-
             {/* Bottom menu */}
-            <View style={{backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 100, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
-            </View>
-
+            <BottomMenu navigation={this.props.navigation} />
             </View>
         );
     }
@@ -307,7 +295,7 @@ const styles = StyleSheet.create({
     },
     line:{
       borderBottomWidth: 1, 
-      marginVertical: 6, 
+      marginVertical: 3, 
       borderColor: Constants.BACKGROUND_GREY_COLOR, 
       width: '90%', 
       alignSelf: 'center'
@@ -316,14 +304,14 @@ const styles = StyleSheet.create({
       width: 50, 
       alignSelf: 'center', 
       justifyContent: 'center',
-      padding: 10,
-      fontSize: 24, 
+      padding: 8,
+      fontSize: 18, 
     },
     infoTitle:{
       fontFamily: Constants.APP_SUBTITLE_FONT,
-      fontSize: 17,
+      fontSize: 15,
       color: Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND,
-      paddingBottom: 5,
+      paddingVertical: 5,
       overflow: 'hidden',
       textAlignVertical: 'center',
     },

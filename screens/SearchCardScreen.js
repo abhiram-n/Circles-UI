@@ -13,6 +13,7 @@ import * as AuthHelpers from '../helpers/AuthHelpers';
 import * as NavigationHelpers from '../helpers/NavigationHelpers';
 import * as VirgilEncryptionHelpers from '../helpers/VirgilEncryptionHelpers';
 import CommonStyles from '../components/CommonStyles';
+import BottomMenu from "../components/BottomMenu";
 import LogInScreen from './LogInScreen';
 import LinearGradient from 'react-native-linear-gradient';
 import IconWithCaptionButton from "../components/IconWithCaptionButton";
@@ -333,12 +334,7 @@ class SearchCardScreen extends Component
             </View>
 
             {/* Bottom menu */}
-            <View style={styles.bottomMenu }>
-                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
-            </View>
+            <BottomMenu navigation={this.props.navigation} />
         </View>
     );
   }

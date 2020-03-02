@@ -114,7 +114,7 @@ export default class CheckInviteCodeScreen extends Component<Props> {
           <Text style={styles.status}>{this.state.statusMessage}</Text>
           
           {/* Bottom buttons */}
-          <View style={{marginTop: 30, flexDirection: 'row', justifyContent: 'center', alignSelf: 'center'}}>
+          <View style={{marginTop: 30, paddingBottom: 20, flexDirection: 'row', justifyContent: 'center', alignSelf: 'center'}}>
               <GradientButton isLarge isLight colors={Constants.DEFAULT_GRADIENT} title={this.state.disableInviteCode ? UIStrings.TITLE_VERIFYING : UIStrings.TITLE_VERIFY} onPress={()=>this.onNextPress()}/>
           </View> 
 

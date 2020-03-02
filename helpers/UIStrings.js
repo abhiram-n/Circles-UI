@@ -70,6 +70,7 @@ export const SEARCH_PAGE_TITLE = "Search for a card"
 export const REQUEST_FOR = "Request for:"
 export const TITLE_REQUEST_COMPLETED = "Great!"
 export const ADD_OR_DELETE_CARDS = "Select cards you own"
+export const ADD_CARDS = "Add Cards"
 
 
 // Other string
@@ -171,6 +172,7 @@ export const ENABLE_NOTIFICATIONS_EXPLANATION = "Be there when your Circle needs
 export const EG_FLIGHT_TICKETS = "Eg. flight tickets"
 export const CHAT_SYSTEM_MESSAGE = "Messages are end-to-end encrypted and self-destruct in about 10 mins."
 export const RESEND_CODE = "Resend code"
+export const CHECK_HOW_IT_WORKS = "Check out how it works"
 
 // Error
 export const ENTER_VALID_NAME = "Please enter a valid name."
@@ -243,5 +245,5 @@ export const CARDS_ADDED_SUFFIX = " card(s):"
 export const CARDS_COLON = "Cards: "
 
 // Templates
-export const WHATSAPP_SHARE_CODE = "https://wa.me/?text=Join my Circle. Here's my code: %.\n\nLink to the app:\nhttp://getcircles.in/"
+export const WHATSAPP_SHARE_CODE = "https://api.whatsapp.com/send?text=Join my Circle. Here's my code: %.\n\nLink to the app:\nhttp://getcircles.in/"
 export const NUM_FRIENDS_CAN_ADD_TO_CIRCLE = "You can add % more friend(s) to your Circle"

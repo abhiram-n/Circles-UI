@@ -18,6 +18,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import FriendRequestButton from '../components/FriendRequestButton';
 import GradientButton from '../components/GradientButton';
 import LottieView from 'lottie-react-native'
+import BottomMenu from '../components/BottomMenu';
 
 const GET_USER_POSTS = "/posts/all"
 const RECEIVED_POSTS_SUFFIX = "?type=received"
@@ -222,7 +223,7 @@ export default class AllPostsScreen extends Component<Props>{
                             {this.state.count == 0 ? <Text style={styles.noPostsText}>{this.state.receivedPostsPressed ? UIStrings.TIP_EXPAND_CIRCLE_INCREASE_ACTIVITY : UIStrings.TIP_ANNOUNCE_NEW_CARD}</Text> : null}
                             {this.state.count == 0  ? 
                                 <View style={{marginTop: 30, alignSelf: 'center', alignContent: 'center'}}>
-                                    <RoundIconWithBackgroundAndCaptionButton icon="notification" iconType="AntDesign" 
+                                    <RoundIconWithBackgroundAndCaptionButton iconParams={{icon:"notification",type:"AntDesign", size: 28}} 
                                     colors={Constants.APP_THEME_COLORS} onPress={()=>{this.openPostPopup()}} 
                                     textColor={Constants.TEXT_COLOR_FOR_LIGHT_BACKGROUND} caption={UIStrings.NEW} />
                                 </View>
@@ -245,12 +246,7 @@ export default class AllPostsScreen extends Component<Props>{
              </View>
 
               {/* Bottom menu */}
-              <View style={{ backgroundColor:Constants.BACKGROUND_WHITE_COLOR, zIndex: 99, position: 'absolute', bottom: 0, flexDirection: 'row', justifyContent: 'space-between', height: Constants.BOTTOM_MENU_HEIGHT, width: '100%', padding: 10}}>
-                <IconWithCaptionButton icon="circle-thin" iconType="FontAwesome" caption={UIStrings.CIRCLE} onPress={()=>{this.props.navigation.navigate('UserHome')}} />
-                <IconWithCaptionButton icon="credit-card" iconType="SimpleLineIcons" caption={UIStrings.REQUESTS} onPress={()=>{this.props.navigation.navigate('AllAccessRequests')}} />
-                <IconWithCaptionButton icon="notification" iconType="AntDesign" caption={UIStrings.BROADCASTS} onPress={()=>{this.props.navigation.navigate('AllPosts')}} />
-                <IconWithCaptionButton icon="team" iconType="AntDesign" caption={UIStrings.INVITES} onPress={()=>{this.props.navigation.navigate('AllFriendRequests')}} />
-              </View>
+              <BottomMenu navigation={this.props.navigation} />
              </View>
         );
     }
